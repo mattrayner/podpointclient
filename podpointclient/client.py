@@ -5,8 +5,8 @@ import aiohttp
 from datetime import datetime, timedelta
 
 from podpointclient.endpoints import API_BASE_URL, CHARGE_SCHEDULES, PODS, UNITS, USERS
-from podpointclient.helpers.auth import Auth
-from podpointclient.helpers.helpers import APIWrapper, Helpers
+from .helpers.auth import Auth
+from .helpers.helpers import APIWrapper, Helpers
 from podpointclient.factories import PodFactory, ScheduleFactory
 from podpointclient.pod import Pod
 
