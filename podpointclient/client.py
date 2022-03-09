@@ -4,11 +4,11 @@ from typing import Optional, Dict, Any, List
 import aiohttp
 from datetime import datetime, timedelta
 
-from podpointclient.endpoints import API_BASE_URL, CHARGE_SCHEDULES, PODS, UNITS, USERS
+from .endpoints import API_BASE_URL, CHARGE_SCHEDULES, PODS, UNITS, USERS
 from .helpers.auth import Auth
 from .helpers.helpers import APIWrapper, Helpers
-from podpointclient.factories import PodFactory, ScheduleFactory
-from podpointclient.pod import Pod
+from .factories import PodFactory, ScheduleFactory
+from .pod import Pod
 
 TIMEOUT = 10
 

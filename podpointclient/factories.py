@@ -1,7 +1,6 @@
-import sched
 from typing import Dict, Any, List
-from podpointclient.pod import Pod
-from podpointclient.schedule import Schedule, ScheduleStatus
+from .pod import Pod
+from .schedule import Schedule, ScheduleStatus
 
 class PodFactory:
     def build_pods(self, pods_reponse: Dict[str, Any]) -> List[Pod]:
