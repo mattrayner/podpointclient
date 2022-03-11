@@ -58,6 +58,17 @@ schedule_status = pod.charge_schedules[0].is_active
 print(schedule_status)
 ```
 
+### Setting charging schedules
+
+> **NOTE:** According to Pod Point, schedules can take up to 5 minutes to be recognised by a device. This applies to both updating of a schedule affecting a device, and the device recognising that it is active/inactive due to entering/exiting a schedule window.
+
+Currently this client supports setting the same schedule across all days for the week. By default it is designed to be used as an on/off switch for charging and creates a schedule lasting 1 second, from 00:00:00 - 00:00:01.
+
+Due to the delay in pods recognising that they are in/out of a schedule this realistically means charging is turned off when this schedule is enabled.
+
+You are able to pass a start_time and end_time when setting schedules but these are set for all days and are in-day only. By which I mean passing `start_time="18:00"` and `end_time="00:15"` will fail as `00:15` is before the start time.
+
+
 ## Contributions are welcome!
 
 If you want to contribute to this please read the [Contribution guidelines](CONTRIBUTING.md).
