@@ -23,9 +23,9 @@ class ScheduleFactory:
             day = i + 1
 
             schedule = Schedule(
-                start_day=i,
+                start_day=day,
                 start_time=start_time,
-                end_day=i,
+                end_day=day,
                 end_time=end_time,
                 status=ScheduleStatus(is_active=enabled)
             )

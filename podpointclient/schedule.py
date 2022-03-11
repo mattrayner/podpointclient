@@ -41,5 +41,3 @@ class Schedule:
 
     def to_json(self):
         return json.dumps(self.dict, ensure_ascii=False)
-
-    

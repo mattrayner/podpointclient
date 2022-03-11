@@ -4,6 +4,8 @@ from typing import Optional, Dict, Any, List
 import aiohttp
 from datetime import datetime, timedelta
 
+from podpointclient.schedule import Schedule
+
 from .endpoints import API_BASE_URL, CHARGE_SCHEDULES, PODS, UNITS, USERS
 from .helpers.auth import Auth
 from .helpers.helpers import APIWrapper, Helpers
@@ -95,9 +97,8 @@ class PodPointClient:
 
     def _schedule_data(self, enabled: bool) -> Dict[str, Any]:
         factory = ScheduleFactory()
-        schedules = factory.build_schedules(enabled=enabled)
+        schedules: List[Schedule] = factory.build_schedules(enabled=enabled)
 
-        d_list = map(lambda schedule: dict(schedule), schedules)
+        d_list = list(map(lambda schedule: schedule.dict, schedules))
 
         return {"data": d_list}
-    
