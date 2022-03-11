@@ -30,22 +30,17 @@ class Socket:
     ocpp_name: str
     ocpp_code: int
 
-    def __iter__(self):
-        yield from {
+    @property
+    def dict(self):
+        return {
             "type": self.type,
             "description": self.description,
             "ocpp_name": self.ocpp_name,
             "ocpp_code": self.ocpp_code
-        }.items()
-
-    def __str__(self):
-        return json.dumps(dict(self), ensure_ascii=False)
-
-    def __repr__(self):
-        return self.__str__()
+        }
 
     def to_json(self):
-        return self.__str__()
+        return json.dumps(self.dict, ensure_ascii=False)
 
 
 class Pod:
@@ -149,8 +144,9 @@ class Pod:
                     status = status_obj
                 )
             )
-
-    def __iter__(self):
+    
+    @property
+    def dict(self) -> Dict[str, Any]:
         helpers = Helpers()
         
         d = {
@@ -161,7 +157,7 @@ class Pod:
             "home": self.home,
             "public": self.public,
             "evZone": self.ev_zone,
-            "location": dict(self.location),
+            "location": self.location.dict,
             "address_id": self.address_id,
             "description": self.description,
             "commissioned_at": helpers.lazy_iso_format_datetime(self.commissioned_at),
@@ -170,7 +166,7 @@ class Pod:
             "contactless_enabled": self.contactless_enabled,
             "unit_id": self.unit_id,
             "timezone": self.timezone,
-            "model": dict(self.model),
+            "model": self.model.dict,
             "price": self.price,
             "statuses": [],
             "unit_connectors": [],
@@ -178,26 +174,20 @@ class Pod:
         }
 
         for status in self.statuses:
-            d['statuses'].append(dict(status))
+            d['statuses'].append(status.dict)
 
         for unit_connector in self.unit_connectors:
             d['unit_connectors'].append(
-                { "connector": dict(unit_connector) }
+                { "connector": unit_connector.dict }
             )
 
         for charge_schedule in self.charge_schedules:
-            d['charge_schedules'].append(dict(charge_schedule))
+            d['charge_schedules'].append(charge_schedule.dict)
 
-        yield from d.items()
+        return d
     
-    def __str__(self):
-        return json.dumps(dict(self), ensure_ascii=False)
-
-    def __repr__(self):
-        return self.__str__()
-
     def to_json(self):
-        return self.__str__()
+        return json.dumps(self.dict, ensure_ascii=False)
 
 
     @dataclass
@@ -214,8 +204,9 @@ class Pod:
         def model(self):
             return self.name
 
-        def __iter__(self):
-            yield from {
+        @property
+        def dict(self):
+            return {
                 "id": self.id,
                 "name": self.name,
                 "vendor": self.vendor,
@@ -223,16 +214,10 @@ class Pod:
                 "supports_ocpp": self.supports_ocpp,
                 "supports_contactless": self.supports_contactless,
                 "image_url": self.image_url
-            }.items()
-
-        def __str__(self):
-            return json.dumps(dict(self), ensure_ascii=False)
-
-        def __repr__(self):
-            return self.__str__()
+            }
 
         def to_json(self):
-            return self.__str__()
+            return json.dumps(self.dict, ensure_ascii=False)
 
 
     @dataclass
@@ -240,20 +225,15 @@ class Pod:
         lat: float
         lng: float
 
-        def __iter__(self):
-            yield from {
+        @property
+        def dict(self):
+            return {
                 "lat": self.lat,
                 "lng": self.lng
-            }.items()
-
-        def __str__(self):
-            return json.dumps(dict(self), ensure_ascii=False)
-
-        def __repr__(self):
-            return self.__str__()
+            }
 
         def to_json(self):
-            return self.__str__()
+            return json.dumps(self.dict, ensure_ascii=False)
 
     
     @dataclass
@@ -265,24 +245,19 @@ class Pod:
         door: str
         door_id: int
 
-        def __iter__(self):
-            yield from {
+        @property
+        def dict(self):
+            return {
                 "id": self.id,
                 "name": self.name,
                 "key_name": self.key_name,
                 "label": self.label,
                 "door": self.door,
                 "door_id": self.door_id
-            }.items()
-
-        def __str__(self):
-            return json.dumps(dict(self), ensure_ascii=False)
-
-        def __repr__(self):
-            return self.__str__()
+            }
 
         def to_json(self):
-            return self.__str__()
+            return json.dumps(self.dict, ensure_ascii=False)
 
     
     @dataclass
@@ -297,8 +272,9 @@ class Pod:
         has_cable: bool
         socket: Socket
 
-        def __iter__(self):
-            yield from {
+        @property
+        def dict(self):
+            return {
                 "id": self.id,
                 "door": self.door,
                 "door_id": self.door_id,
@@ -307,14 +283,8 @@ class Pod:
                 "voltage": self.voltage,
                 "charge_method": self.charge_method,
                 "has_cable": self.has_cable,
-                "socket": dict(self.socket)
-            }.items()
-
-        def __str__(self):
-            return json.dumps(dict(self), ensure_ascii=False)
-
-        def __repr__(self):
-            return self.__str__()
+                "socket": self.socket.dict
+            }
 
         def to_json(self):
-            return self.__str__()
+            return json.dumps(self.dict, ensure_ascii=False)

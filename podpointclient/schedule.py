@@ -19,7 +19,8 @@ class Schedule:
     def is_active(self):
         return self.status.is_active
 
-    def __iter__(self):
+    @property
+    def dict(self):
         d = {
             "start_day": self.start_day,
             "start_time": self.start_time,
@@ -36,15 +37,9 @@ class Schedule:
           ud.update(d)
           d = ud
 
-        yield from d.items()
-    
-    def __str__(self):
-        return json.dumps(dict(self), ensure_ascii=False)
-
-    def __repr__(self):
-        return self.__str__()
+        return d
 
     def to_json(self):
-        return self.__str__()
+        return json.dumps(self.dict, ensure_ascii=False)
 
     
