@@ -81,5 +81,5 @@ If you want to contribute to this please read the [Contribution guidelines](CONT
 [commits]: https://github.com/mattrayner/podpointclient/commits/master
 [license-shield]: https://img.shields.io/github/license/mattrayner/podpointclient.svg?style=for-the-badge
 [maintenance-shield]: https://img.shields.io/badge/maintainer-Matt%20Rayner-blue.svg?style=for-the-badge
-[releases-shield]: https://img.shields.io/github/release/mattrayner/podpointclientt.svg?style=for-the-badge
+[releases-shield]: https://img.shields.io/github/release/mattrayner/podpointclient.svg?style=for-the-badge
 [releases]: https://github.com/mattrayner/podpointclient/releases
