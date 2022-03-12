@@ -4,6 +4,7 @@ USERS = '/users'
 PODS = '/pods'
 UNITS = '/units'
 CHARGE_SCHEDULES = '/charge-schedules'
+CHARGES = '/charges'
 
 API_BASE = 'api.pod-point.com'
 API_VERSION = 'v4'

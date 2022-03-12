@@ -5,9 +5,10 @@ import json
 from podpointclient.client import PodPointClient
 from typing import List
 from podpointclient.pod import Pod
+from podpointclient.charge import Charge
 import pytest
 
-from podpointclient.endpoints import API_BASE_URL, AUTH, CHARGE_SCHEDULES, PODS, SESSIONS, UNITS, USERS
+from podpointclient.endpoints import API_BASE_URL, AUTH, CHARGE_SCHEDULES, CHARGES, PODS, SESSIONS, UNITS, USERS
 
 @pytest.mark.asyncio
 async def test_async_get_pods_response():
@@ -73,3 +74,57 @@ async def test_async_set_schedules_response():
             client = PodPointClient(username="1233", password="1234", session=session)
             resp = await client.async_set_schedule(True, Pod(data=pod_data))
             assert True == resp
+
+@pytest.mark.asyncio
+async def test_async_get_charges_response():
+    auth_response = {
+        "token_type": "Bearer",
+        "expires_in": 1234,
+        "access_token": "1234",
+        "refresh_token": "1234"
+    }
+    session_response = {
+        "sessions": {
+            "id": "1234",
+            "user_id": "1234"
+        }
+    }
+    charges_reponse = json.load(open('./tests/fixtures/complete_charges.json'))
+    charges_reponse_small = json.load(open('./tests/fixtures/small_charges.json'))
+    charges_reponse_small_page_2 = json.load(open('./tests/fixtures/small_charges_page_2.json'))
+    charges_reponse_med = json.load(open('./tests/fixtures/med_charges.json'))
+    charges_reponse_empty = json.load(open('./tests/fixtures/charges_empty.json'))
+
+    with aioresponses() as m:
+        m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
+        m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
+        m.get(f'{API_BASE_URL}{USERS}/1234{CHARGES}?perpage=all&page=1', payload=charges_reponse)
+        m.get(f'{API_BASE_URL}{USERS}/1234{CHARGES}?perpage=5&page=1', payload=charges_reponse_small)
+        m.get(f'{API_BASE_URL}{USERS}/1234{CHARGES}?perpage=5&page=2', payload=charges_reponse_small_page_2)
+        m.get(f'{API_BASE_URL}{USERS}/1234{CHARGES}?perpage=5&page=42', payload=charges_reponse_empty)
+        m.get(f'{API_BASE_URL}{USERS}/1234{CHARGES}?perpage=10&page=1', payload=charges_reponse_med)
+
+        async with aiohttp.ClientSession() as session:
+            client = PodPointClient(username="1233", password="1234", session=session)
+            
+            # Test that by default we request 5 Charge items
+            resp: List[Charge] = await client.async_get_charges()
+            assert 5 == len(resp)
+            assert Charge == type(resp[0])
+
+            # Test that a request for 10 will result in 10
+            resp: List[Charge] = await client.async_get_charges(per_page=10)
+            assert 10 == len(resp)
+
+            # Test that a request for all will result in all
+            resp: List[Charge] = await client.async_get_charges(per_page="all")
+            assert 21 == len(resp)
+
+            # Test that pages work as expected
+            resp: List[Charge] = await client.async_get_charges(per_page=5, page=2)
+            assert 5 == len(resp)
+            assert 6 == resp[0].id
+
+            # Test that requesting a page that is out of bounds returns an empty list
+            resp: List[Charge] = await client.async_get_charges(per_page=5, page=42)
+            assert 0 == len(resp)

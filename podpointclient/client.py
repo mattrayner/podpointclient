@@ -6,10 +6,10 @@ from datetime import datetime, timedelta
 
 from podpointclient.schedule import Schedule
 
-from .endpoints import API_BASE_URL, CHARGE_SCHEDULES, PODS, UNITS, USERS
+from .endpoints import API_BASE_URL, CHARGE_SCHEDULES, PODS, UNITS, USERS, CHARGES
 from .helpers.auth import Auth
 from .helpers.helpers import APIWrapper, Helpers
-from .factories import PodFactory, ScheduleFactory
+from .factories import PodFactory, ScheduleFactory, ChargeFactory
 from .pod import Pod
 
 TIMEOUT = 10
@@ -56,7 +56,7 @@ class PodPointClient:
         json = await response.json()
 
         factory = PodFactory()
-        pods = factory.build_pods(pods_reponse=json)
+        pods = factory.build_pods(pods_response=json)
 
         return pods
 
@@ -94,6 +94,28 @@ class PodPointClient:
             text = await response.text()
             _LOGGER.warn("Expected to recieve 201 status code when creating schedules. Got (%s) - %s", response.status, text)
             return False
+
+    async def async_get_charges(self, home_only: bool = False, per_page: str = "5", page: str = "1"):
+        """Get charges from the API."""
+        await self.auth.async_update_access_token()
+
+        path = f"{USERS}/{self.auth.user_id}{CHARGES}"
+        url = f"{API_BASE_URL}{path}"
+        params = {"perpage": per_page, "page": page}
+
+        helpers = Helpers()
+        headers = helpers.auth_headers(access_token=self.auth.access_token)
+
+        response = await self.api_wrapper.get(url=url, params=params, headers=headers)
+
+        _LOGGER.debug(response)
+
+        json = await response.json()
+
+        factory = ChargeFactory()
+        pods = factory.build_charges(charge_response=json)
+
+        return pods
 
     def _schedule_data(self, enabled: bool) -> Dict[str, Any]:
         factory = ScheduleFactory()

@@ -1,12 +1,13 @@
 from typing import Dict, Any, List
 from .pod import Pod
 from .schedule import Schedule, ScheduleStatus
+from .charge import Charge
 
 class PodFactory:
-    def build_pods(self, pods_reponse: Dict[str, Any]) -> List[Pod]:
+    def build_pods(self, pods_response: Dict[str, Any]) -> List[Pod]:
         pods = []
 
-        pods_data = pods_reponse.get('pods', None) 
+        pods_data = pods_response.get('pods', None) 
         if pods_data is None:
             return pods
 
@@ -33,3 +34,17 @@ class ScheduleFactory:
             schedules.append(schedule)
 
         return schedules
+
+
+class ChargeFactory:
+    def build_charges(self, charge_response: Dict[str, Any]) -> List[Charge]:
+        charges = []
+
+        charge_data = charge_response.get('charges', None) 
+        if charge_data is None:
+            return charges
+
+        for charge in charge_data:
+            charges.append(Charge(data=charge))
+
+        return charges

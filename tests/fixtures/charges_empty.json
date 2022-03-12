@@ -1,0 +1,11 @@
+{
+    "charges": [],
+    "meta": {
+        "pagination": {
+            "current_page": 42,
+            "per_page": 5,
+            "page_count": 5,
+            "item_count": 22
+        }
+    }
+}

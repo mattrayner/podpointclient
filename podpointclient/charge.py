@@ -1,7 +1,7 @@
 from datetime import datetime
 from dataclasses import dataclass
 from re import M
-from types import Dict, Any
+from typing import Dict, Any
 
 class Charge:
     def __init__(self, data: Dict[str, Any]):
