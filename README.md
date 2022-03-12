@@ -25,6 +25,7 @@ Method | Description
 `async_get_pods()` | *Get all pods from a user's account* - Returns a list of `Pod` objects.
 `async_get_pod(pod_id=1234)` | *Gets an individual pod* - Returns a single `Pod`. *_NOTE: The Pod Point API does not support a single-pod return so this method gets all pods and filters._*
 `async_set_schedule(enabled=False, pod=pod)` | *Updates a pod with a week of schedules that will enable or disable charging* - See setting charging schedules for more information on how this works.
+`async_get_charges(per_page=5, page=2)` | *Get charges for a user* - Returns a list of `Charge` objects. `per_page` can be 'all', or a number. Can get additional pages with `page` attribute.
 
 ### Example
 
