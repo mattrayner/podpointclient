@@ -34,6 +34,10 @@ class Charge:
             name = organisation_data.get('name', None)
         )
 
+    @property
+    def home(self) -> bool:
+        self.location.home
+
 
     @dataclass
     class BillingEvent:

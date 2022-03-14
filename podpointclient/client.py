@@ -95,7 +95,7 @@ class PodPointClient:
             _LOGGER.warn("Expected to recieve 201 status code when creating schedules. Got (%s) - %s", response.status, text)
             return False
 
-    async def async_get_charges(self, home_only: bool = False, per_page: str = "5", page: str = "1"):
+    async def async_get_charges(self, per_page: str = "5", page: str = "1"):
         """Get charges from the API."""
         await self.auth.async_update_access_token()
 
