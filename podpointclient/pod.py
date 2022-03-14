@@ -1,11 +1,12 @@
 from dataclasses import dataclass
 from datetime import datetime
 from sqlite3 import DatabaseError
-from typing import Dict, Any
+from typing import Dict, Any, List
 from .schedule import Schedule, ScheduleStatus
 from enum import auto
 from strenum import StrEnum, KebabCaseStrEnum
 from .helpers.helpers import Helpers
+from .charge import Charge
 import json
 
 
@@ -63,6 +64,9 @@ class Pod:
         self.unit_id: int              = data.get('unit_id', None)
         self.timezone: str             = data.get('timezone', None)
         self.price: int                = data.get('price', None)
+        self.charges: List[Charge]     = list()
+        self.total_kwh: float          = 0.0
+        self.current_kwh: float        = 0.0
 
         model_data = data.get('model', {})
         self.model = self.Model(

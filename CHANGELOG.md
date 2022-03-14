@@ -1,5 +1,16 @@
 # Pod Point Client Changelog
 
+## v0.1.2
+
+* Add placeholder values for pods:
+  * `.total_kwh`
+  * `.current_kwh`
+  * `.charges`
+
+## v0.1.1
+
+* Add `.home` attribute to `Pod` objects
+
 ## v0.1.0
 
 * Add 'Charges' functionality
