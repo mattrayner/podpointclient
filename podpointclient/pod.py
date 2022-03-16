@@ -174,7 +174,9 @@ class Pod:
             "price": self.price,
             "statuses": [],
             "unit_connectors": [],
-            "charge_schedules": []
+            "charge_schedules": [],
+            "total_kwh": self.total_kwh,
+            "current_kwh": self.current_kwh
         }
 
         for status in self.statuses:

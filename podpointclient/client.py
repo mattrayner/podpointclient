@@ -113,9 +113,9 @@ class PodPointClient:
         json = await response.json()
 
         factory = ChargeFactory()
-        pods = factory.build_charges(charge_response=json)
+        charges = factory.build_charges(charge_response=json)
 
-        return pods
+        return charges
 
     def _schedule_data(self, enabled: bool) -> Dict[str, Any]:
         factory = ScheduleFactory()
