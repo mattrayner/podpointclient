@@ -42,7 +42,6 @@ class Auth():
 
     async def async_update_access_token(self) -> bool:
         """Update access token, if needed."""
-        _LOGGER.debug(self.check_access_token())
         if self.check_access_token():
             return True
 
@@ -65,11 +64,6 @@ class Auth():
             else:
                 _LOGGER.error("Error updating access token")
 
-            _LOGGER.debug("Going to return with:")
-            _LOGGER.debug((access_token_updated and session_created))
-            _LOGGER.debug(access_token_updated)
-            _LOGGER.debug(session_created)
-
             return (access_token_updated and session_created)
         except AuthError as exception:
             _LOGGER.error("Error updating access token. %s", exception)
@@ -85,21 +79,13 @@ class Auth():
         payload = {"username": self.email, "password": self.password}
 
         try:
-            print(url)
-            print(payload)
-            print(HEADERS)
-
-            _LOGGER.debug('Posting to wrapper')
             wrapper = APIWrapper(session=self._session)
             response = await wrapper.post(url, body=payload, headers=HEADERS)
-
-            _LOGGER.debug(response)
 
             if response.status != 200:
                 await self.__handle_response_error(response, AuthError)
             else:
                 json = await response.json()
-                _LOGGER.debug(json)
                 self.access_token = json["access_token"]
                 self.access_token_expiry = datetime.now() + timedelta(
                     seconds=json["expires_in"] - 10

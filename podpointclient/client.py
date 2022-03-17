@@ -51,8 +51,6 @@ class PodPointClient:
 
         response = await self.api_wrapper.get(url=url, params=params, headers=headers)
 
-        _LOGGER.debug(response)
-
         json = await response.json()
 
         factory = PodFactory()
@@ -82,10 +80,6 @@ class PodPointClient:
         headers = helpers.auth_headers(access_token=self.auth.access_token)
         payload = self._schedule_data(enabled)
 
-        _LOGGER.debug(url)
-        _LOGGER.debug(headers)
-        _LOGGER.debug(payload)
-
         response = await self.api_wrapper.put(url=url, body=payload, headers=headers)
 
         if response.status == 201:
@@ -107,8 +101,6 @@ class PodPointClient:
         headers = helpers.auth_headers(access_token=self.auth.access_token)
 
         response = await self.api_wrapper.get(url=url, params=params, headers=headers)
-
-        _LOGGER.debug(response)
 
         json = await response.json()
 
