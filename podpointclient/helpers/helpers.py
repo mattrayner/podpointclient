@@ -8,6 +8,7 @@ import logging
 import socket
 from datetime import datetime
 import re
+import time
 
 from ..errors import APIError
 
@@ -77,6 +78,9 @@ class APIWrapper:
         """Get information from the API."""
         try:
             async with async_timeout.timeout(self._timeout):
+                start_time = time.time()
+                _LOGGER.debug(f"{method.upper()} {url} {params}")
+
                 response = None
 
                 if method == "get":
@@ -92,6 +96,9 @@ class APIWrapper:
 
                 if response is None:
                     raise APIError("Unexpected error from Pod Point API. Received a None response when querying.")
+
+                end_time = time.time()
+                _LOGGER.debug(f"{response.status} - {end_time - start_time}s")
 
                 if response.status < 200 or response.status > 202:
                     self.__handle_response_error(response=response, exception_class=exception_class)
