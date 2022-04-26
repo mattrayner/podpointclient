@@ -78,11 +78,14 @@ class PodPointClient:
 
         helpers = Helpers()
         headers = helpers.auth_headers(access_token=self.auth.access_token)
-        payload = self._schedule_data(enabled)
+        payload = self._schedule_data(enabled=enabled)
+
+        _LOGGER.debug(f"Schedule payload: %s", payload)
 
         response = await self.api_wrapper.put(url=url, body=payload, headers=headers)
 
         if response.status == 201:
+            _LOGGER.debug("Response: %s", await response.text())
             return True
         else:
             text = await response.text()

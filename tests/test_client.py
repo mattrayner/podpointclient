@@ -128,3 +128,115 @@ async def test_async_get_charges_response():
             # Test that requesting a page that is out of bounds returns an empty list
             resp: List[Charge] = await client.async_get_charges(per_page=5, page=42)
             assert 0 == len(resp)
+
+async def test__schedule_data():
+    async with aiohttp.ClientSession() as session:
+            client = PodPointClient(username="1233", password="1234", session=session)
+            true_data = {
+                'data': [
+                    {
+                        'end_day': 1,
+                        'end_time': '00:00:01',
+                        'start_day': 1,
+                        'start_time': '00:00:00',
+                        'status': {'is_active': True}
+                    },
+                    {
+                        'end_day': 2,
+                        'end_time': '00:00:01',
+                        'start_day': 2,
+                        'start_time': '00:00:00',
+                        'status': {'is_active': True}
+                    },
+                    {
+                        'end_day': 3,
+                        'end_time': '00:00:01',
+                        'start_day': 3,
+                        'start_time': '00:00:00',
+                        'status': {'is_active': True}
+                    },
+                    {
+                        'end_day': 4,
+                        'end_time': '00:00:01',
+                        'start_day': 4,
+                        'start_time': '00:00:00',
+                        'status': {'is_active': True}
+                    },
+                    {
+                        'end_day': 5,
+                        'end_time': '00:00:01',
+                        'start_day': 5,
+                        'start_time': '00:00:00',
+                        'status': {'is_active': True}
+                    },
+                    {
+                        'end_day': 6,
+                        'end_time': '00:00:01',
+                        'start_day': 6,
+                        'start_time': '00:00:00',
+                        'status': {'is_active': True}
+                    },
+                    {
+                        'end_day': 7,
+                        'end_time': '00:00:01',
+                        'start_day': 7,
+                        'start_time': '00:00:00',
+                        'status': {'is_active': True}
+                    },
+                ]
+            }
+            false_data = {
+                'data': [
+                    {
+                        'end_day': 1,
+                        'end_time': '00:00:01',
+                        'start_day': 1,
+                        'start_time': '00:00:00',
+                        'status': {'is_active': False}
+                    },
+                    {
+                        'end_day': 2,
+                        'end_time': '00:00:01',
+                        'start_day': 2,
+                        'start_time': '00:00:00',
+                        'status': {'is_active': False}
+                    },
+                    {
+                        'end_day': 3,
+                        'end_time': '00:00:01',
+                        'start_day': 3,
+                        'start_time': '00:00:00',
+                        'status': {'is_active': False}
+                    },
+                    {
+                        'end_day': 4,
+                        'end_time': '00:00:01',
+                        'start_day': 4,
+                        'start_time': '00:00:00',
+                        'status': {'is_active': False}
+                    },
+                    {
+                        'end_day': 5,
+                        'end_time': '00:00:01',
+                        'start_day': 5,
+                        'start_time': '00:00:00',
+                        'status': {'is_active': False}
+                    },
+                    {
+                        'end_day': 6,
+                        'end_time': '00:00:01',
+                        'start_day': 6,
+                        'start_time': '00:00:00',
+                        'status': {'is_active': False}
+                    },
+                    {
+                        'end_day': 7,
+                        'end_time': '00:00:01',
+                        'start_day': 7,
+                        'start_time': '00:00:00',
+                        'status': {'is_active': False}
+                    },
+                ]
+            }
+            assert client._schedule_data(True) == true_data
+            assert client._schedule_data(False) == false_data
