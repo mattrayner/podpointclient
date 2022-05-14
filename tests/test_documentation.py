@@ -5,6 +5,9 @@ from aioresponses import aioresponses
 from podpointclient.pod import Pod
 from .helpers import Mocks
 
+from freezegun import freeze_time
+
+@freeze_time("Jan 1st, 2022")
 async def test_readme():
     with aioresponses() as m:
         mocks = Mocks(m)
