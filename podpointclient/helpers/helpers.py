@@ -87,10 +87,10 @@ class APIWrapper:
                     response = await self._session.get(url, headers=headers, params=params)
 
                 elif method == "put":
-                    response = await self._session.put(url, headers=headers, json=data)
+                    response = await self._session.put(url, headers=headers, params=params, json=data)
 
                 elif method == "post":
-                    response = await self._session.post(url, headers=headers, json=data)
+                    response = await self._session.post(url, headers=headers, params=params, json=data)
                 else:
                     raise ValueError("Method '%s' not supported", method)
 

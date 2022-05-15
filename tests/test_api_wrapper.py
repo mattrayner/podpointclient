@@ -29,7 +29,7 @@ async def test_post(aiohttp_client):
 @pytest.mark.asyncio
 async def test_put(aiohttp_client):
   with aioresponses() as m:
-    m.put('https://google.com/api/v1/test', body="OK")
+    m.put('https://google.com/api/v1/test?foo=bar', body="OK")
 
     async with aiohttp.ClientSession() as session:
       wrapper = APIWrapper(session)

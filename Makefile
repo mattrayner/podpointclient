@@ -1,10 +1,13 @@
 .PHONY: clean package publish
 
+test:
+	pytest
+
 clean:
 	rm -r dist/*
 
 package:
-	python setup.py sdist
+	python3 setup.py sdist
 
 publish: clean package
 	twine upload dist/* --verbose

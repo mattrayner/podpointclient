@@ -16,9 +16,9 @@ class Mocks:
 
         self.m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
         self.m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
-        self.m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?perpage=all&include=statuses,price,model,unit_connectors,charge_schedules', payload=pods_response)
-        self.m.put(f'{API_BASE_URL}{UNITS}/198765{CHARGE_SCHEDULES}', payload=pods_response, status=201)
-        self.m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?perpage=all&include=statuses,price,model,unit_connectors,charge_schedules', payload=pods_response_schedule_disabled)
+        self.m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?perpage=all&include=statuses,price,model,unit_connectors,charge_schedules&timestamp=1640995200.0', payload=pods_response)
+        self.m.put(f'{API_BASE_URL}{UNITS}/198765{CHARGE_SCHEDULES}?timestamp=1640995200.0', payload=pods_response, status=201)
+        self.m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?perpage=all&include=statuses,price,model,unit_connectors,charge_schedules&timestamp=1640995200.0', payload=pods_response_schedule_disabled)
 
     def auth_response(self):
         return self.__json_load_fixture('auth')

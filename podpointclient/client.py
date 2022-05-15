@@ -44,7 +44,7 @@ class PodPointClient:
         url = f"{API_BASE_URL}{path}"
 
         includes = ["statuses", "price", "model", "unit_connectors", "charge_schedules"]
-        params = {"perpage": "all", "include": ",".join(includes)}
+        params = {"perpage": "all", "include": ",".join(includes), "timestamp": datetime.now().timestamp()}
 
         helpers = Helpers()
         headers = helpers.auth_headers(access_token=self.auth.access_token)
@@ -75,14 +75,18 @@ class PodPointClient:
         
         path = f"{UNITS}/{unit_id}{CHARGE_SCHEDULES}"
         url = f"{API_BASE_URL}{path}"
+        params = {"timestamp": datetime.now().timestamp()}
 
         helpers = Helpers()
         headers = helpers.auth_headers(access_token=self.auth.access_token)
-        payload = self._schedule_data(enabled)
+        payload = self._schedule_data(enabled=enabled)
 
-        response = await self.api_wrapper.put(url=url, body=payload, headers=headers)
+        _LOGGER.debug(f"Schedule payload: %s", payload)
+
+        response = await self.api_wrapper.put(url=url, body=payload, headers=headers, params=params)
 
         if response.status == 201:
+            _LOGGER.debug("Response: %s", await response.text())
             return True
         else:
             text = await response.text()
@@ -95,7 +99,7 @@ class PodPointClient:
 
         path = f"{USERS}/{self.auth.user_id}{CHARGES}"
         url = f"{API_BASE_URL}{path}"
-        params = {"perpage": per_page, "page": page}
+        params = {"perpage": per_page, "page": page, "timestamp": datetime.now().timestamp()}
 
         helpers = Helpers()
         headers = helpers.auth_headers(access_token=self.auth.access_token)
