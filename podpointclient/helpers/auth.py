@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 import aiohttp
 
-from ..errors import AuthError, SessionError
+from ..errors import APIError, AuthError, SessionError
 from .session import Session
 from ..endpoints import API_BASE_URL, AUTH
 from .helpers import APIWrapper, HEADERS
@@ -71,6 +71,7 @@ class Auth():
         except SessionError as exception:
             _LOGGER.error("Error creating session. %s", exception)
             raise exception
+
     async def __update_access_token(self) -> bool:
         return_value = False
 
@@ -81,7 +82,7 @@ class Auth():
 
         try:
             wrapper = APIWrapper(session=self._session)
-            response = await wrapper.post(url, body=payload, headers=HEADERS)
+            response = await wrapper.post(url, body=payload, headers=HEADERS, exception_class=AuthError)
 
             if response.status != 200:
                 await self.__handle_response_error(response, AuthError)
@@ -92,9 +93,15 @@ class Auth():
                     seconds=json["expires_in"] - 10
                 )
                 return_value = True
+        except AuthError as exception:
+            raise exception
         except KeyError as exception:
-            _LOGGER.error(f"Error processing access token response: {exception}")
-            await self.__handle_response_error(response, SessionError)
+            raise AuthError(response.status, f"Error processing access token response. {exception} not found in json.")
+        except TypeError as exception:
+            raise AuthError(response.status, f"Error processing access token response. When calculating expiry date, got: {exception}.")
+        except APIError as exception:
+            _LOGGER.error("Received a APIError UNEXPECTEDLY. Should only have recieved AuthError.")
+            raise exception
 
         return return_value
 

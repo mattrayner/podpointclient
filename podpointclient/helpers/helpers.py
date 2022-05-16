@@ -10,7 +10,7 @@ from datetime import datetime
 import re
 import time
 
-from ..errors import APIError
+from ..errors import APIError, AuthError, SessionError
 
 TIMEOUT=10
 HEADERS = {"Content-type": "application/json; charset=UTF-8"}
@@ -129,6 +129,10 @@ class APIWrapper:
             )
             await self.__handle_response_error(response=response, exception_class=exception_class)
 
+        except (AuthError, SessionError) as exception:
+            _LOGGER.error("Authentication error when creating auth or session. (%s)", type(exception))
+            raise exception
+
         except Exception as exception:  # pylint: disable=broad-except
             _LOGGER.error("Something really wrong happened")
             raise exception
@@ -139,4 +143,4 @@ class APIWrapper:
         response = await response.text()
         _LOGGER.error(response)
 
-        raise exception_class(status, response) 
+        raise exception_class(status, response)

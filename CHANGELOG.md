@@ -1,5 +1,9 @@
 # Pod Point Client Changelog
 
+## v0.1.3
+
+* Stop supressing `AuthError` and `SessionError`. This allows upstream clients to correctly handle these.
+
 ## v0.1.2
 
 * Add placeholder values for pods:

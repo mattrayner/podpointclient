@@ -37,7 +37,6 @@ class Session:
                 self.session_id = json['sessions']['id']
                 return_value = True
         except KeyError as exception:
-            _LOGGER.error(f"Error processing session response {exception}")
-            raise SessionError(exception)
+            raise SessionError(response.status, f"Error processing session response. Unable to find key: {exception} within json.")
 
         return return_value
