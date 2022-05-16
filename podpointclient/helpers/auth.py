@@ -67,9 +67,10 @@ class Auth():
             return (access_token_updated and session_created)
         except AuthError as exception:
             _LOGGER.error("Error updating access token. %s", exception)
+            raise exception
         except SessionError as exception:
             _LOGGER.error("Error creating session. %s", exception)
-
+            raise exception
     async def __update_access_token(self) -> bool:
         return_value = False
 

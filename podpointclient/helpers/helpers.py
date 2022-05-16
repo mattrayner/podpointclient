@@ -101,7 +101,7 @@ class APIWrapper:
                 _LOGGER.debug(f"{response.status} - {end_time - start_time}s")
 
                 if response.status < 200 or response.status > 202:
-                    self.__handle_response_error(response=response, exception_class=exception_class)
+                    await self.__handle_response_error(response=response, exception_class=exception_class)
 
                 return response
 
@@ -127,7 +127,7 @@ class APIWrapper:
                 url,
                 exception,
             )
-            self.__handle_response_error(response=response, exception_class=exception_class)
+            await self.__handle_response_error(response=response, exception_class=exception_class)
 
         except Exception as exception:  # pylint: disable=broad-except
             _LOGGER.error("Something really wrong happened")
