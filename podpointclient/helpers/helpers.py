@@ -10,7 +10,7 @@ from datetime import datetime
 import re
 import time
 
-from ..errors import APIError, AuthError, SessionError
+from ..errors import APIError, AuthError, SessionError, ConnectionError
 
 TIMEOUT=10
 HEADERS = {"Content-type": "application/json; charset=UTF-8"}
@@ -106,12 +106,9 @@ class APIWrapper:
                 return response
 
         except asyncio.TimeoutError as exception:
-            _LOGGER.error(
-                "Timeout error fetching information from %s - %s",
+            raise ConnectionError("Timeout error fetching information from %s - %s",
                 url,
-                exception,
-            )
-            raise exception
+                exception,)
 
         except (KeyError, TypeError) as exception:
             _LOGGER.error(
@@ -122,12 +119,7 @@ class APIWrapper:
             raise exception
 
         except (aiohttp.ClientError, socket.gaierror) as exception:
-            _LOGGER.error(
-                "Error fetching information from %s - %s",
-                url,
-                exception,
-            )
-            await self.__handle_response_error(response=response, exception_class=exception_class)
+            raise ConnectionError("Error connecting to Pod Point (%s) - %s", url, exception)
 
         except (AuthError, SessionError) as exception:
             _LOGGER.error("Authentication error when creating auth or session. (%s)", type(exception))
@@ -139,8 +131,6 @@ class APIWrapper:
 
     async def __handle_response_error(self, response: aiohttp.ClientResponse, exception_class):
         status = response.status
-        _LOGGER.error(f"Unexpected response when creating session ({status})")
         response = await response.text()
-        _LOGGER.error(response)
 
         raise exception_class(status, response)

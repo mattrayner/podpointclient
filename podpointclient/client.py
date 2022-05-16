@@ -69,7 +69,7 @@ class PodPointClient:
 
         unit_id = pod.unit_id
 
-        _LOGGER.info(
+        _LOGGER.debug(
             f"Updating pod schedule for unit {unit_id}. Enabling schedule: {enabled}"
         )
         
@@ -81,12 +81,9 @@ class PodPointClient:
         headers = helpers.auth_headers(access_token=self.auth.access_token)
         payload = self._schedule_data(enabled=enabled)
 
-        _LOGGER.debug(f"Schedule payload: %s", payload)
-
         response = await self.api_wrapper.put(url=url, body=payload, headers=headers, params=params)
 
         if response.status == 201:
-            _LOGGER.debug("Response: %s", await response.text())
             return True
         else:
             text = await response.text()

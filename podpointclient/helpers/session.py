@@ -32,7 +32,6 @@ class Session:
             json = await response.json()
 
             if json['sessions']:
-                _LOGGER.debug("Setting session")
                 self.user_id = json['sessions']['user_id']
                 self.session_id = json['sessions']['id']
                 return_value = True

@@ -49,7 +49,6 @@ class Auth():
             session_created: bool = False
             _LOGGER.debug('Updating access token')
             access_token_updated: bool = await self.__update_access_token()
-            _LOGGER.debug('Done')
 
             if access_token_updated:
                 _LOGGER.debug(
@@ -75,8 +74,6 @@ class Auth():
     async def __update_access_token(self) -> bool:
         return_value = False
 
-        _LOGGER.info("Updating Pod Point access token")
-
         url = f"{API_BASE_URL}{AUTH}"
         payload = {"username": self.email, "password": self.password}
 
@@ -100,15 +97,12 @@ class Auth():
         except TypeError as exception:
             raise AuthError(response.status, f"Error processing access token response. When calculating expiry date, got: {exception}.")
         except APIError as exception:
-            _LOGGER.error("Received a APIError UNEXPECTEDLY. Should only have recieved AuthError.")
             raise exception
 
         return return_value
 
     async def __handle_response_error(self, response, error_class):
         status = response.status
-        _LOGGER.error(f"Unexpected response when creating session ({status})")
         response = await response.text()
-        _LOGGER.error(response)
 
         raise error_class(status, response)
