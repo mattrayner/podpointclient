@@ -6,7 +6,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="podpointclient",
-    version="0.1.12",
+    version="0.1.14",
     author="Matthew Rayner",
     author_email="hello@rayner.io",
     description="A simple API client for Pod Point (https://pod-point.com) aimed at home users",

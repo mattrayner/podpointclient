@@ -10,7 +10,7 @@ from datetime import datetime
 import re
 import time
 
-from ..errors import APIError
+from ..errors import APIError, AuthError, SessionError, ConnectionError
 
 TIMEOUT=10
 HEADERS = {"Content-type": "application/json; charset=UTF-8"}
@@ -101,17 +101,12 @@ class APIWrapper:
                 _LOGGER.debug(f"{response.status} - {end_time - start_time}s")
 
                 if response.status < 200 or response.status > 202:
-                    self.__handle_response_error(response=response, exception_class=exception_class)
+                    await self.__handle_response_error(response=response, exception_class=exception_class)
 
                 return response
 
         except asyncio.TimeoutError as exception:
-            _LOGGER.error(
-                "Timeout error fetching information from %s - %s",
-                url,
-                exception,
-            )
-            raise exception
+            raise ConnectionError(f"Timeout error fetching information from {url} - {exception}")
 
         except (KeyError, TypeError) as exception:
             _LOGGER.error(
@@ -122,12 +117,11 @@ class APIWrapper:
             raise exception
 
         except (aiohttp.ClientError, socket.gaierror) as exception:
-            _LOGGER.error(
-                "Error fetching information from %s - %s",
-                url,
-                exception,
-            )
-            self.__handle_response_error(response=response, exception_class=exception_class)
+            raise ConnectionError("Error connecting to Pod Point (%s) - %s", url, exception)
+
+        except (AuthError, SessionError) as exception:
+            _LOGGER.error("Authentication error when creating auth or session. (%s)", type(exception))
+            raise exception
 
         except Exception as exception:  # pylint: disable=broad-except
             _LOGGER.error("Something really wrong happened")
@@ -135,8 +129,6 @@ class APIWrapper:
 
     async def __handle_response_error(self, response: aiohttp.ClientResponse, exception_class):
         status = response.status
-        _LOGGER.error(f"Unexpected response when creating session ({status})")
         response = await response.text()
-        _LOGGER.error(response)
 
-        raise exception_class(status, response) 
+        raise exception_class(status, response)

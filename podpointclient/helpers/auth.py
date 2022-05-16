@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 import aiohttp
 
-from ..errors import AuthError, SessionError
+from ..errors import APIError, AuthError, SessionError
 from .session import Session
 from ..endpoints import API_BASE_URL, AUTH
 from .helpers import APIWrapper, HEADERS
@@ -49,7 +49,6 @@ class Auth():
             session_created: bool = False
             _LOGGER.debug('Updating access token')
             access_token_updated: bool = await self.__update_access_token()
-            _LOGGER.debug('Done')
 
             if access_token_updated:
                 _LOGGER.debug(
@@ -67,20 +66,20 @@ class Auth():
             return (access_token_updated and session_created)
         except AuthError as exception:
             _LOGGER.error("Error updating access token. %s", exception)
+            raise exception
         except SessionError as exception:
             _LOGGER.error("Error creating session. %s", exception)
+            raise exception
 
     async def __update_access_token(self) -> bool:
         return_value = False
-
-        _LOGGER.info("Updating Pod Point access token")
 
         url = f"{API_BASE_URL}{AUTH}"
         payload = {"username": self.email, "password": self.password}
 
         try:
             wrapper = APIWrapper(session=self._session)
-            response = await wrapper.post(url, body=payload, headers=HEADERS)
+            response = await wrapper.post(url, body=payload, headers=HEADERS, exception_class=AuthError)
 
             if response.status != 200:
                 await self.__handle_response_error(response, AuthError)
@@ -91,16 +90,19 @@ class Auth():
                     seconds=json["expires_in"] - 10
                 )
                 return_value = True
+        except AuthError as exception:
+            raise exception
         except KeyError as exception:
-            _LOGGER.error(f"Error processing access token response: {exception}")
-            await self.__handle_response_error(response, SessionError)
+            raise AuthError(response.status, f"Error processing access token response. {exception} not found in json.")
+        except TypeError as exception:
+            raise AuthError(response.status, f"Error processing access token response. When calculating expiry date, got: {exception}.")
+        except APIError as exception:
+            raise exception
 
         return return_value
 
     async def __handle_response_error(self, response, error_class):
         status = response.status
-        _LOGGER.error(f"Unexpected response when creating session ({status})")
         response = await response.text()
-        _LOGGER.error(response)
 
         raise error_class(status, response)
