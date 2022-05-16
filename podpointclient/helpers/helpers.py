@@ -106,9 +106,7 @@ class APIWrapper:
                 return response
 
         except asyncio.TimeoutError as exception:
-            raise ConnectionError("Timeout error fetching information from %s - %s",
-                url,
-                exception,)
+            raise ConnectionError(f"Timeout error fetching information from {url} - {exception}")
 
         except (KeyError, TypeError) as exception:
             _LOGGER.error(
