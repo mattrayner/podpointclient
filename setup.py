@@ -1,16 +1,16 @@
 from setuptools import setup, find_packages
 
-# with open('podpointclient/version.py') as fh:  exec(fh.read())
-# with open("README.md", "r") as fh:
-#     long_description = fh.read()
+with open('podpointclient/version.py') as fh:  exec(fh.read())
+with open("README.md", "r") as fh:
+    long_description = fh.read()
 
 setup(
     name="podpointclient",
-    version="0.1.14",
+    version=__version__,
     author="Matthew Rayner",
     author_email="hello@rayner.io",
     description="A simple API client for Pod Point (https://pod-point.com) aimed at home users",
-    long_description="A simple API client for Pod Point (https://pod-point.com) aimed at home users",
+    long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/mattrayner/podpointclient",
     project_urls={
