@@ -1,6 +1,6 @@
 from urllib import response
 import aiohttp
-from podpointclient.errors import APIError, ConnectionError
+from podpointclient.errors import APIError, ApiConnectionError
 from podpointclient.helpers.helpers import APIWrapper
 import pytest
 from aioresponses import aioresponses
@@ -59,7 +59,7 @@ async def test_connection_errors(aiohttp_client):
     async with aiohttp.ClientSession() as session:
       wrapper = APIWrapper(session)
 
-      with pytest.raises(ConnectionError) as exc_info:   
+      with pytest.raises(ApiConnectionError) as exc_info:   
         await wrapper.get("https://google.com/api/v1/test", headers={}, params={"foo": "bar"})
 
       assert "Connection Error: Timeout error fetching information from https://google.com/api/v1/test - Connection timeout test" in str(exc_info.value)

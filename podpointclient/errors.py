@@ -11,6 +11,6 @@ class SessionError(APIError):
         message = f'Session Error ({status}) - {response}'
         super().__init__(message)
 
-class ConnectionError(APIError):
+class ApiConnectionError(APIError):
     def __init__(self, message):
         super().__init__(f'Connection Error: {message}')
