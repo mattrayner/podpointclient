@@ -117,7 +117,7 @@ class APIWrapper:
             raise exception
 
         except (aiohttp.ClientError, socket.gaierror) as exception:
-            raise ConnectionError("Error connecting to Pod Point (%s) - %s", url, exception)
+            raise ConnectionError(f"Error connecting to Pod Point ({url}) - {exception}")
 
         except (AuthError, SessionError) as exception:
             _LOGGER.error("Authentication error when creating auth or session. (%s)", type(exception))
