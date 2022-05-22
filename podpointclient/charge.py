@@ -1,9 +1,21 @@
+"""Charge class, represents a 'Charge' from the podpoint apis"""
+
 from datetime import datetime
 from dataclasses import dataclass
-from re import M
-from typing import Dict, Any
+from typing import Dict, Any, List
+
+from dataclasses import field
 
 from podpointclient.helpers.helpers import Helpers
+
+@dataclass
+class ChargeDurationFormat:
+    value: str = None
+    unit: str  = None
+
+    def __str__(self) -> str:
+        return " ".join(list(filter(None, [self.value, self.unit])))
+
 
 class Charge:
     def __init__(self, data: Dict[str, Any]):
@@ -15,6 +27,12 @@ class Charge:
         self.starts_at: datetime = helpers.lazy_convert_to_datetime(data.get('starts_at', None))
         self.ends_at: datetime   = helpers.lazy_convert_to_datetime(data.get('ends_at', None))
         self.energy_cost: int    = data.get('energy_cost', None)
+
+        charging_duration_data = data.get('charging_duration', {})
+        self.charging_duration = self.ChargingDuration(
+            raw       = charging_duration_data.get('raw', None),
+            formatted = charging_duration_data.get('formatted', [])
+        )
 
         billing_event_data = data.get('billing_event', {})
         self.billing_event = self.BillingEvent(
@@ -41,6 +59,28 @@ class Charge:
     @property
     def home(self) -> bool:
         return self.location.home
+
+
+    @dataclass
+    class ChargingDuration:
+        raw: int                                = None
+        formatted: 'list[ChargeDurationFormat]' = field(default_factory=list)
+
+        def __init__(self, raw: int, formatted: List[Dict[str,str]]) -> None:
+            self.raw = raw
+            self.formatted: list[ChargeDurationFormat] = []
+
+            if formatted is not None and len(formatted) > 0:
+                for formatted_data in formatted:
+                    self.formatted.append(
+                        ChargeDurationFormat(
+                            value = formatted_data.get("value", None),
+                            unit  = formatted_data.get("unit", None)
+                        )
+                    )
+
+        def __str__(self) -> str:
+            return " ".join(list(filter(None, map(lambda x: str(x) ,self.formatted))))
 
 
     @dataclass

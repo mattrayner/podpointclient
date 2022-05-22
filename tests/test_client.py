@@ -122,7 +122,7 @@ async def test_async_get_charges_response():
 
             # Test that a request for all will result in all
             resp: List[Charge] = await client.async_get_charges(per_page="all")
-            assert 21 == len(resp)
+            assert 10 == len(resp)
 
             # Test that pages work as expected
             resp: List[Charge] = await client.async_get_charges(per_page=5, page=2)

@@ -1,5 +1,11 @@
 # Pod Point Client Changelog
 
+## v0.2.0
+
+* Add `ChargeDuration` to `Charge` as `charge.charge_duration`
+  * Charge duration is the amount of time during a charge 'session' spent delivering power. Available as `raw` int duration and as `formatted` value e.g. '1 hour 32 minutes', '<5 minutes', '2 hours 5 minutes' etc.
+  * String-ing a ChargeDuration returns the formatted string and Int-ing a ChargeDuration returns the raw value
+
 ## v0.1.3
 
 * Stop supressing `AuthError` and `SessionError`. This allows upstream clients to correctly handle these.

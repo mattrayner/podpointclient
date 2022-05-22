@@ -2,10 +2,14 @@
     "charges": [
         {
             "id": 1,
-            "kwh_used": 3.2,
+            "kwh_used": 12.2,
             "duration": 0,
-            "starts_at": "2022-03-08:00:00+00:00",
+            "starts_at": "2022-05-22T17:23:14+00:00",
             "ends_at": null,
+            "charging_duration": {
+                "raw": null,
+                "formatted": null
+            },
             "billing_event": {
                 "id": null,
                 "amount": null,
@@ -34,10 +38,19 @@
         },
         {
             "id": 2,
-            "kwh_used": 6.3,
-            "duration": 1393,
-            "starts_at": "2022-03-10T13:00:00+00:00",
-            "ends_at": "2022-03-11T12:00:00+00:00",
+            "kwh_used": 2.8,
+            "duration": 1444,
+            "starts_at": "2022-05-21T10:57:34+00:00",
+            "ends_at": "2022-05-22T11:02:28+00:00",
+            "charging_duration": {
+                "raw": 2492,
+                "formatted": [
+                    {
+                        "unit": "minutes",
+                        "value": "41"
+                    }
+                ]
+            },
             "billing_event": {
                 "id": null,
                 "amount": null,
@@ -58,7 +71,7 @@
             "pod": {
                 "id": 198765
             },
-            "energy_cost": 116,
+            "energy_cost": 51,
             "organisation": {
                 "id": null,
                 "name": null
@@ -66,10 +79,23 @@
         },
         {
             "id": 3,
-            "kwh_used": 2.1,
-            "duration": 932,
-            "starts_at": "2022-03-08T17:26:04+00:00",
-            "ends_at": "2022-03-09T08:58:10+00:00",
+            "kwh_used": 7,
+            "duration": 826,
+            "starts_at": "2022-05-20T19:03:45+01:00",
+            "ends_at": "2022-05-21T08:50:44+01:00",
+            "charging_duration": {
+                "raw": 5049,
+                "formatted": [
+                    {
+                        "unit": "hour",
+                        "value": "1"
+                    },
+                    {
+                        "unit": "minutes",
+                        "value": "24"
+                    }
+                ]
+            },
             "billing_event": {
                 "id": null,
                 "amount": null,
@@ -90,7 +116,7 @@
             "pod": {
                 "id": 198765
             },
-            "energy_cost": 39,
+            "energy_cost": 128,
             "organisation": {
                 "id": null,
                 "name": null
@@ -98,298 +124,23 @@
         },
         {
             "id": 4,
-            "kwh_used": 9.2,
-            "duration": 163,
-            "starts_at": "2022-03-08T14:00:26+00:00",
-            "ends_at": "2022-03-08T16:43:26+00:00",
-            "billing_event": {
-                "id": null,
-                "amount": null,
-                "currency": null,
-                "exchange_rate": 0,
-                "presentment_amount": null,
-                "presentment_currency": null
-            },
-            "location": {
-                "id": 1234,
-                "home": true,
-                "address": {
-                    "id": 1234,
-                    "business_name": ""
-                },
-                "timezone": "Europe/London"
-            },
-            "pod": {
-                "id": 198765
-            },
-            "energy_cost": 169,
-            "organisation": {
-                "id": null,
-                "name": null
-            }
-        },
-        {
-            "id": 5,
-            "kwh_used": 8.2,
-            "duration": 3969,
-            "starts_at": "2022-03-05T17:26:32+00:00",
-            "ends_at": "2022-03-08T11:35:58+00:00",
-            "billing_event": {
-                "id": null,
-                "amount": null,
-                "currency": null,
-                "exchange_rate": 0,
-                "presentment_amount": null,
-                "presentment_currency": null
-            },
-            "location": {
-                "id": 1234,
-                "home": true,
-                "address": {
-                    "id": 1234,
-                    "business_name": ""
-                },
-                "timezone": "Europe/London"
-            },
-            "pod": {
-                "id": 198765
-            },
-            "energy_cost": 150,
-            "organisation": {
-                "id": null,
-                "name": null
-            }
-        },
-        {
-            "id": 6,
-            "kwh_used": 1.8,
-            "duration": 171,
-            "starts_at": "2022-02-27T08:40:05+00:00",
-            "ends_at": "2022-02-27T11:31:50+00:00",
-            "billing_event": {
-                "id": null,
-                "amount": null,
-                "currency": null,
-                "exchange_rate": 0,
-                "presentment_amount": null,
-                "presentment_currency": null
-            },
-            "location": {
-                "id": 1234,
-                "home": true,
-                "address": {
-                    "id": 1234,
-                    "business_name": ""
-                },
-                "timezone": "Europe/London"
-            },
-            "pod": {
-                "id": 198765
-            },
-            "energy_cost": 33,
-            "organisation": {
-                "id": null,
-                "name": null
-            }
-        },
-        {
-            "id": 7,
-            "kwh_used": 0.5,
-            "duration": 1097,
-            "starts_at": "2022-02-25T17:31:52+00:00",
-            "ends_at": "2022-02-26T11:49:40+00:00",
-            "billing_event": {
-                "id": null,
-                "amount": null,
-                "currency": null,
-                "exchange_rate": 0,
-                "presentment_amount": null,
-                "presentment_currency": null
-            },
-            "location": {
-                "id": 1234,
-                "home": true,
-                "address": {
-                    "id": 1234,
-                    "business_name": ""
-                },
-                "timezone": "Europe/London"
-            },
-            "pod": {
-                "id": 198765
-            },
-            "energy_cost": 9,
-            "organisation": {
-                "id": null,
-                "name": null
-            }
-        },
-        {
-            "id": 8,
-            "kwh_used": 0.6,
-            "duration": 5,
-            "starts_at": "2022-02-25T17:25:49+00:00",
-            "ends_at": "2022-02-25T17:31:28+00:00",
-            "billing_event": {
-                "id": null,
-                "amount": null,
-                "currency": null,
-                "exchange_rate": 0,
-                "presentment_amount": null,
-                "presentment_currency": null
-            },
-            "location": {
-                "id": 1234,
-                "home": true,
-                "address": {
-                    "id": 1234,
-                    "business_name": ""
-                },
-                "timezone": "Europe/London"
-            },
-            "pod": {
-                "id": 198765
-            },
-            "energy_cost": 11,
-            "organisation": {
-                "id": null,
-                "name": null
-            }
-        },
-        {
-            "id": 9,
-            "kwh_used": 0.4,
-            "duration": 4,
-            "starts_at": "2022-02-25T17:21:01+00:00",
-            "ends_at": "2022-02-25T17:25:41+00:00",
-            "billing_event": {
-                "id": null,
-                "amount": null,
-                "currency": null,
-                "exchange_rate": 0,
-                "presentment_amount": null,
-                "presentment_currency": null
-            },
-            "location": {
-                "id": 1234,
-                "home": true,
-                "address": {
-                    "id": 1234,
-                    "business_name": ""
-                },
-                "timezone": "Europe/London"
-            },
-            "pod": {
-                "id": 198765
-            },
-            "energy_cost": 7,
-            "organisation": {
-                "id": null,
-                "name": null
-            }
-        },
-        {
-            "id": 10,
-            "kwh_used": 5.2,
-            "duration": 336,
-            "starts_at": "2022-02-25T11:17:04+00:00",
-            "ends_at": "2022-02-25T16:53:53+00:00",
-            "billing_event": {
-                "id": null,
-                "amount": null,
-                "currency": null,
-                "exchange_rate": 0,
-                "presentment_amount": null,
-                "presentment_currency": null
-            },
-            "location": {
-                "id": 1234,
-                "home": true,
-                "address": {
-                    "id": 1234,
-                    "business_name": ""
-                },
-                "timezone": "Europe/London"
-            },
-            "pod": {
-                "id": 198765
-            },
-            "energy_cost": 95,
-            "organisation": {
-                "id": null,
-                "name": null
-            }
-        },
-        {
-            "id": 11,
-            "kwh_used": 3.4,
-            "duration": 222,
-            "starts_at": "2022-02-22T11:43:54+00:00",
-            "ends_at": "2022-02-22T15:26:19+00:00",
-            "billing_event": {
-                "id": null,
-                "amount": null,
-                "currency": null,
-                "exchange_rate": 0,
-                "presentment_amount": null,
-                "presentment_currency": null
-            },
-            "location": {
-                "id": 1234,
-                "home": true,
-                "address": {
-                    "id": 1234,
-                    "business_name": ""
-                },
-                "timezone": "Europe/London"
-            },
-            "pod": {
-                "id": 198765
-            },
-            "energy_cost": 62,
-            "organisation": {
-                "id": null,
-                "name": null
-            }
-        },
-        {
-            "id": 12,
-            "kwh_used": 12,
-            "duration": 1436,
-            "starts_at": "2022-02-19T16:15:36+00:00",
-            "ends_at": "2022-02-20T16:12:18+00:00",
-            "billing_event": {
-                "id": null,
-                "amount": null,
-                "currency": null,
-                "exchange_rate": 0,
-                "presentment_amount": null,
-                "presentment_currency": null
-            },
-            "location": {
-                "id": 1234,
-                "home": true,
-                "address": {
-                    "id": 1234,
-                    "business_name": ""
-                },
-                "timezone": "Europe/London"
-            },
-            "pod": {
-                "id": 198765
-            },
-            "energy_cost": 220,
-            "organisation": {
-                "id": null,
-                "name": null
-            }
-        },
-        {
-            "id": 13,
             "kwh_used": 10,
-            "duration": 2099,
-            "starts_at": "2022-02-14T21:10:41+00:00",
-            "ends_at": "2022-02-16T08:10:14+00:00",
+            "duration": 1259,
+            "starts_at": "2022-05-19T12:44:28+01:00",
+            "ends_at": "2022-05-20T09:43:58+01:00",
+            "charging_duration": {
+                "raw": 6341,
+                "formatted": [
+                    {
+                        "unit": "hour",
+                        "value": "1"
+                    },
+                    {
+                        "unit": "minutes",
+                        "value": "45"
+                    }
+                ]
+            },
             "billing_event": {
                 "id": null,
                 "amount": null,
@@ -417,11 +168,24 @@
             }
         },
         {
-            "id": 14,
-            "kwh_used": 2.2,
-            "duration": 66,
-            "starts_at": "2022-02-14T09:45:32+00:00",
-            "ends_at": "2022-02-14T10:51:40+00:00",
+            "id": 5,
+            "kwh_used": 8.3,
+            "duration": 1285,
+            "starts_at": "2022-05-13T15:20:20+01:00",
+            "ends_at": "2022-05-14T12:45:56+01:00",
+            "charging_duration": {
+                "raw": 5696,
+                "formatted": [
+                    {
+                        "unit": "hour",
+                        "value": "1"
+                    },
+                    {
+                        "unit": "minutes",
+                        "value": "34"
+                    }
+                ]
+            },
             "billing_event": {
                 "id": null,
                 "amount": null,
@@ -442,18 +206,27 @@
             "pod": {
                 "id": 198765
             },
-            "energy_cost": 40,
+            "energy_cost": 152,
             "organisation": {
                 "id": null,
                 "name": null
             }
         },
         {
-            "id": 15,
-            "kwh_used": 0,
-            "duration": 0,
-            "starts_at": "2022-02-13T10:28:12+00:00",
-            "ends_at": "2022-02-13T10:28:18+00:00",
+            "id": 6,
+            "kwh_used": 2.6,
+            "duration": 1244,
+            "starts_at": "2022-05-09T14:51:20+01:00",
+            "ends_at": "2022-05-10T11:36:09+01:00",
+            "charging_duration": {
+                "raw": 2311,
+                "formatted": [
+                    {
+                        "unit": "minutes",
+                        "value": "38"
+                    }
+                ]
+            },
             "billing_event": {
                 "id": null,
                 "amount": null,
@@ -474,18 +247,27 @@
             "pod": {
                 "id": 198765
             },
-            "energy_cost": null,
+            "energy_cost": 48,
             "organisation": {
                 "id": null,
                 "name": null
             }
         },
         {
-            "id": 16,
-            "kwh_used": 0,
-            "duration": 0,
-            "starts_at": "2022-02-13T10:28:01+00:00",
-            "ends_at": "2022-02-13T10:28:05+00:00",
+            "id": 7,
+            "kwh_used": 1.2,
+            "duration": 1566,
+            "starts_at": "2022-05-08T11:08:22+01:00",
+            "ends_at": "2022-05-09T13:15:05+01:00",
+            "charging_duration": {
+                "raw": 1319,
+                "formatted": [
+                    {
+                        "unit": "minutes",
+                        "value": "21"
+                    }
+                ]
+            },
             "billing_event": {
                 "id": null,
                 "amount": null,
@@ -506,18 +288,27 @@
             "pod": {
                 "id": 198765
             },
-            "energy_cost": null,
+            "energy_cost": 22,
             "organisation": {
                 "id": null,
                 "name": null
             }
         },
         {
-            "id": 17,
-            "kwh_used": 0.1,
-            "duration": 4,
-            "starts_at": "2022-02-13T10:23:20+00:00",
-            "ends_at": "2022-02-13T10:27:50+00:00",
+            "id": 8,
+            "kwh_used": 1.5,
+            "duration": 1198,
+            "starts_at": "2022-05-07T14:43:52+01:00",
+            "ends_at": "2022-05-08T10:42:40+01:00",
+            "charging_duration": {
+                "raw": 1566,
+                "formatted": [
+                    {
+                        "unit": "minutes",
+                        "value": "26"
+                    }
+                ]
+            },
             "billing_event": {
                 "id": null,
                 "amount": null,
@@ -538,18 +329,31 @@
             "pod": {
                 "id": 198765
             },
-            "energy_cost": null,
+            "energy_cost": 28,
             "organisation": {
                 "id": null,
                 "name": null
             }
         },
         {
-            "id": 18,
-            "kwh_used": 0,
-            "duration": 0,
-            "starts_at": "2022-02-13T10:22:17+00:00",
-            "ends_at": "2022-02-13T10:23:13+00:00",
+            "id": 9,
+            "kwh_used": 6.7,
+            "duration": 149,
+            "starts_at": "2022-05-07T10:52:14+01:00",
+            "ends_at": "2022-05-07T13:21:16+01:00",
+            "charging_duration": {
+                "raw": 4483,
+                "formatted": [
+                    {
+                        "unit": "hour",
+                        "value": "1"
+                    },
+                    {
+                        "unit": "minutes",
+                        "value": "14"
+                    }
+                ]
+            },
             "billing_event": {
                 "id": null,
                 "amount": null,
@@ -562,7 +366,7 @@
                 "id": 1234,
                 "home": true,
                 "address": {
-                    "id": 1234,
+                    "id": 95681,
                     "business_name": ""
                 },
                 "timezone": "Europe/London"
@@ -570,18 +374,31 @@
             "pod": {
                 "id": 198765
             },
-            "energy_cost": null,
+            "energy_cost": 123,
             "organisation": {
                 "id": null,
                 "name": null
             }
         },
         {
-            "id": 19,
-            "kwh_used": 0,
-            "duration": 0,
-            "starts_at": "2022-02-13T10:22:02+00:00",
-            "ends_at": "2022-02-13T10:22:04+00:00",
+            "id": 10,
+            "kwh_used": 7,
+            "duration": 2188,
+            "starts_at": "2022-05-05T20:18:24+01:00",
+            "ends_at": "2022-05-07T08:46:38+01:00",
+            "charging_duration": {
+                "raw": 4868,
+                "formatted": [
+                    {
+                        "unit": "hour",
+                        "value": "1"
+                    },
+                    {
+                        "unit": "minutes",
+                        "value": "21"
+                    }
+                ]
+            },
             "billing_event": {
                 "id": null,
                 "amount": null,
@@ -594,7 +411,7 @@
                 "id": 1234,
                 "home": true,
                 "address": {
-                    "id": 1234,
+                    "id": 95681,
                     "business_name": ""
                 },
                 "timezone": "Europe/London"
@@ -602,71 +419,7 @@
             "pod": {
                 "id": 198765
             },
-            "energy_cost": null,
-            "organisation": {
-                "id": null,
-                "name": null
-            }
-        },
-        {
-            "id": 20,
-            "kwh_used": 0,
-            "duration": 0,
-            "starts_at": "2022-01-25T14:47:02+00:00",
-            "ends_at": "2022-01-25T14:47:04+00:00",
-            "billing_event": {
-                "id": null,
-                "amount": null,
-                "currency": null,
-                "exchange_rate": 0,
-                "presentment_amount": null,
-                "presentment_currency": null
-            },
-            "location": {
-                "id": 1234,
-                "home": true,
-                "address": {
-                    "id": 1234,
-                    "business_name": ""
-                },
-                "timezone": "Europe/London"
-            },
-            "pod": {
-                "id": 198765
-            },
-            "energy_cost": null,
-            "organisation": {
-                "id": null,
-                "name": null
-            }
-        },
-        {
-            "id": 21,
-            "kwh_used": 0,
-            "duration": 0,
-            "starts_at": "2022-01-25T14:46:54+00:00",
-            "ends_at": "2022-01-25T14:46:56+00:00",
-            "billing_event": {
-                "id": null,
-                "amount": null,
-                "currency": null,
-                "exchange_rate": 0,
-                "presentment_amount": null,
-                "presentment_currency": null
-            },
-            "location": {
-                "id": 1234,
-                "home": true,
-                "address": {
-                    "id": 1234,
-                    "business_name": ""
-                },
-                "timezone": "Europe/London"
-            },
-            "pod": {
-                "id": 198765
-            },
-            "energy_cost": null,
+            "energy_cost": 128,
             "organisation": {
                 "id": null,
                 "name": null
@@ -676,9 +429,9 @@
     "meta": {
         "pagination": {
             "current_page": 1,
-            "per_page": 21,
+            "per_page": 10,
             "page_count": 1,
-            "item_count": 21
+            "item_count": 10
         }
     }
 }
