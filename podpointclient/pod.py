@@ -66,6 +66,7 @@ class Pod:
         self.price: int                = data.get('price', None)
         self.charges: List[Charge]     = list()
         self.total_kwh: float          = 0.0
+        self.total_charge_seconds: int = 0
         self.current_kwh: float        = 0.0
 
         model_data = data.get('model', {})
@@ -176,6 +177,7 @@ class Pod:
             "unit_connectors": [],
             "charge_schedules": [],
             "total_kwh": self.total_kwh,
+            "total_charge_seconds": self.total_charge_seconds,
             "current_kwh": self.current_kwh
         }
 
