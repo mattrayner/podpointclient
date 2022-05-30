@@ -26,6 +26,9 @@ class Mocks:
     def session_response(self):
         return self.__json_load_fixture('session')
 
+    def charge_response(self):
+        return self.__json_load_fixture('complete_charges')
+
     def pods_response(self, pod_count: int = 1):
         pod = self.complete_pod()
 

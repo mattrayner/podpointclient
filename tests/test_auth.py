@@ -1,10 +1,12 @@
 from datetime import datetime, timedelta
 from timeit import repeat
+from unittest.mock import AsyncMock, MagicMock
 from podpointclient.errors import AuthError, SessionError
 from podpointclient.helpers.auth import Auth
 import aiohttp
 import asyncio
 from aioresponses import aioresponses
+import logging
 
 from podpointclient.endpoints import API_BASE, API_BASE_URL, API_VERSION, AUTH, SESSIONS
 
@@ -219,3 +221,6 @@ async def test_session_json_error():
 
             assert "Session Error (200) - Error processing session response. Unable to find key: 'id' within json." in str(exc_info.value)
 
+def test_auth_no_session():
+    auth = Auth(email=EMAIL, password=PASSWORD, session=False)
+    assert auth.user_id == None

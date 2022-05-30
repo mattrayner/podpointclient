@@ -11,3 +11,9 @@ def test_pod_factory_single_pod_creation():
     
     assert 1 == len(pods)
     assert Pod == type(pods[0])
+
+def test_pod_factory_with_no_pods():
+    factory = PodFactory()
+    pods = factory.build_pods({})
+
+    assert pods == []

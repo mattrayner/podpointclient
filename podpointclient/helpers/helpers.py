@@ -46,11 +46,6 @@ class Helpers:
 
         return date_time.isoformat()
 
-    def default_serialisation(self, obj):
-        if hasattr(obj, 'to_json'):
-            return obj.to_json()
-        raise TypeError(f'Object of type {obj.__class__.__name__} is not JSON serializable')
-            
 
 class APIWrapper:
     def __init__(self, session: aiohttp.ClientSession, timeout: int = TIMEOUT) -> None:

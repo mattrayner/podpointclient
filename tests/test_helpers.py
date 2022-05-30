@@ -32,3 +32,12 @@ def test_lazy_convert_to_datetime(caplog):
     assert helpers.lazy_convert_to_datetime("2022-01-25T09:00:00+00:00:00") == datetime(2022,1,25,9,0,0, tzinfo=timezone.utc)
     assert helpers.lazy_convert_to_datetime("2022-01-25T09:00:00+01:00:00") == ams.localize(datetime(2022,1,25,9,0,0))
     assert helpers.lazy_convert_to_datetime("2022-01-25T09:00:00Z") == datetime(2022,1,25,9,0,0, tzinfo=timezone.utc)
+
+def test_lazy_iso_format_datetime():
+    helpers = Helpers()
+
+    # When passing a non-datetime
+    assert helpers.lazy_iso_format_datetime(date_time=12345) == None
+
+    # When passing a datetime
+    assert helpers.lazy_iso_format_datetime(date_time=datetime(2022,1,25,9,0,0, tzinfo=timezone.utc)) == "2022-01-25T09:00:00+00:00"

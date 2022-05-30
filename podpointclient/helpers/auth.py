@@ -83,13 +83,13 @@ class Auth():
 
             if response.status != 200:
                 await self.__handle_response_error(response, AuthError)
-            else:
-                json = await response.json()
-                self.access_token = json["access_token"]
-                self.access_token_expiry = datetime.now() + timedelta(
-                    seconds=json["expires_in"] - 10
-                )
-                return_value = True
+
+            json = await response.json()
+            self.access_token = json["access_token"]
+            self.access_token_expiry = datetime.now() + timedelta(
+                seconds=json["expires_in"] - 10
+            )
+            return_value = True
         except AuthError as exception:
             raise exception
         except KeyError as exception:

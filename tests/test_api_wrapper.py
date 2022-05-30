@@ -6,7 +6,7 @@ import pytest
 from aioresponses import aioresponses
 
 @pytest.mark.asyncio
-async def test_get(aresponses):
+async def test_get(aiohttp_client):
   with aioresponses() as m:
     m.get('https://google.com/api/v1/test', status=200, body="OK")
 
