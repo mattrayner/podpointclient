@@ -1,6 +1,6 @@
 from podpointclient.charge import Charge
 from podpointclient.factories import ChargeFactory
-from .helpers import Mocks
+from helpers import Mocks
 
 def test_charge_factory_charge_array_creation():
     mocks = Mocks()

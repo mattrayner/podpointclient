@@ -1,6 +1,6 @@
 from podpointclient.pod import Pod
 from podpointclient.factories import PodFactory
-from .helpers import Mocks
+from helpers import Mocks
 
 def test_pod_factory_single_pod_creation():
     mocks = Mocks()
