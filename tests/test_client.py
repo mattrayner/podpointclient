@@ -38,7 +38,39 @@ async def test_async_get_pods_response():
         m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?include=statuses%252Cprice%252Cmodel%252Cunit_connectors%252Ccharge_schedules&perpage=all&timestamp=1640995200.0', payload=pods_response)
 
         async with aiohttp.ClientSession() as session:
-            client = PodPointClient(username="1233", password="1234", session=session)
+            client = PodPointClient(username="1233", password="1234", session=session, include_timestamp=True)
+            pods = await client.async_get_pods()
+            assert 1 == len(pods)
+            assert list == type(pods)
+            assert Pod == type(pods[0])
+
+@pytest.mark.asyncio
+async def test_async_get_pods_response_without_timestamp():
+    auth_response = {
+        "token_type": "Bearer",
+        "expires_in": 1234,
+        "access_token": "1234",
+        "refresh_token": "1234"
+    }
+    session_response = {
+        "sessions": {
+            "id": "1234",
+            "user_id": "1234"
+        }
+    }
+    pods_response = {
+        "pods": [
+            json.load(open('./tests/fixtures/complete_pod.json'))
+        ]
+    }
+
+    with aioresponses() as m:
+        m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
+        m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
+        m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?include=statuses%252Cprice%252Cmodel%252Cunit_connectors%252Ccharge_schedules&perpage=all', payload=pods_response)
+
+        async with aiohttp.ClientSession() as session:
+            client = PodPointClient(username="1233", password="1234", session=session, include_timestamp=False)
             pods = await client.async_get_pods()
             assert 1 == len(pods)
             assert list == type(pods)
@@ -74,7 +106,7 @@ async def test_async_set_schedules_response():
         m.put(f'{API_BASE_URL}{UNITS}/198765{CHARGE_SCHEDULES}?timestamp=1640995200.0', status=201, payload=schedules_response)
 
         async with aiohttp.ClientSession() as session:
-            client = PodPointClient(username="1233", password="1234", session=session)
+            client = PodPointClient(username="1233", password="1234", session=session, include_timestamp=True)
             resp = await client.async_set_schedule(True, Pod(data=pod_data))
             assert True == resp
 
@@ -109,7 +141,7 @@ async def test_async_get_charges_response():
         m.get(f'{API_BASE_URL}{USERS}/1234{CHARGES}?perpage=10&page=1&timestamp=1640995200.0', payload=charges_reponse_med)
 
         async with aiohttp.ClientSession() as session:
-            client = PodPointClient(username="1233", password="1234", session=session)
+            client = PodPointClient(username="1233", password="1234", session=session, include_timestamp=True)
             
             # Test that by default we request 5 Charge items
             resp: List[Charge] = await client.async_get_charges()
@@ -135,7 +167,7 @@ async def test_async_get_charges_response():
 
 async def test__schedule_data():
     async with aiohttp.ClientSession() as session:
-            client = PodPointClient(username="1233", password="1234", session=session)
+            client = PodPointClient(username="1233", password="1234", session=session, include_timestamp=True)
             true_data = {
                 'data': [
                     {

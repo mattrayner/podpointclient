@@ -23,7 +23,7 @@ class PodPointClient:
     """API Client for communicating with Pod Point."""
 
     def __init__(
-        self, username: str, password: str, session: aiohttp.ClientSession = aiohttp.ClientSession()
+        self, username: str, password: str, session: aiohttp.ClientSession = aiohttp.ClientSession(), include_timestamp: bool = False
     ) -> None:
         """Pod Point API Client."""
         self.email = username
@@ -35,6 +35,7 @@ class PodPointClient:
             session=self._session
         )
         self.api_wrapper = APIWrapper(session=self._session)
+        self.include_timestamp = include_timestamp
 
     async def async_get_pods(self) -> List[Pod]:
         """Get pods from the API."""
@@ -44,7 +45,9 @@ class PodPointClient:
         url = f"{API_BASE_URL}{path}"
 
         includes = ["statuses", "price", "model", "unit_connectors", "charge_schedules"]
-        params = {"perpage": "all", "include": ",".join(includes), "timestamp": datetime.now().timestamp()}
+        params = {"perpage": "all", "include": ",".join(includes)}
+        if self.include_timestamp:
+            params = self._add_timestamp_to_params(params)
 
         helpers = Helpers()
         headers = helpers.auth_headers(access_token=self.auth.access_token)
@@ -75,7 +78,9 @@ class PodPointClient:
         
         path = f"{UNITS}/{unit_id}{CHARGE_SCHEDULES}"
         url = f"{API_BASE_URL}{path}"
-        params = {"timestamp": datetime.now().timestamp()}
+        params = None
+        if self.include_timestamp:
+            params = self._add_timestamp_to_params({})
 
         helpers = Helpers()
         headers = helpers.auth_headers(access_token=self.auth.access_token)
@@ -96,7 +101,9 @@ class PodPointClient:
 
         path = f"{USERS}/{self.auth.user_id}{CHARGES}"
         url = f"{API_BASE_URL}{path}"
-        params = {"perpage": per_page, "page": page, "timestamp": datetime.now().timestamp()}
+        params = {"perpage": per_page, "page": page}
+        if self.include_timestamp:
+            params = self._add_timestamp_to_params(params)
 
         helpers = Helpers()
         headers = helpers.auth_headers(access_token=self.auth.access_token)
@@ -117,3 +124,8 @@ class PodPointClient:
         d_list = list(map(lambda schedule: schedule.dict, schedules))
 
         return {"data": d_list}
+
+    def _add_timestamp_to_params(self, params: Dict[str, Any]) -> Dict[str, any]:
+        params["timestamp"] = datetime.now().timestamp()
+
+        return params

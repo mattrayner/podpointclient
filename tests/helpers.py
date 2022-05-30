@@ -8,17 +8,25 @@ class Mocks:
     def __init__(self, m = None) -> None:
         self.m = m
 
-    def happy_path(self):
+    def happy_path(self, include_timestamp=False):
         auth_response = self.auth_response()
         session_response = self.session_response()
         pods_response = self.pods_response()
         pods_response_schedule_disabled = self.pods_response_schedule_disabled()
 
+        timestamp = ""
+        and_timestamp = ""
+        question_timestamp = ""
+        if include_timestamp:
+            timestamp = 'timestamp=1640995200.0'
+            and_timestamp = f'&{timestamp}'
+            question_timestamp = f'?{timestamp}'
+
         self.m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
         self.m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
-        self.m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?perpage=all&include=statuses,price,model,unit_connectors,charge_schedules&timestamp=1640995200.0', payload=pods_response)
-        self.m.put(f'{API_BASE_URL}{UNITS}/198765{CHARGE_SCHEDULES}?timestamp=1640995200.0', payload=pods_response, status=201)
-        self.m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?perpage=all&include=statuses,price,model,unit_connectors,charge_schedules&timestamp=1640995200.0', payload=pods_response_schedule_disabled)
+        self.m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?perpage=all&include=statuses,price,model,unit_connectors,charge_schedules{and_timestamp}', payload=pods_response)
+        self.m.put(f'{API_BASE_URL}{UNITS}/198765{CHARGE_SCHEDULES}{question_timestamp}', payload=pods_response, status=201)
+        self.m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?perpage=all&include=statuses,price,model,unit_connectors,charge_schedules{and_timestamp}', payload=pods_response_schedule_disabled)
 
     def auth_response(self):
         return self.__json_load_fixture('auth')
