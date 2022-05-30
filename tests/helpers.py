@@ -1,7 +1,6 @@
 import json
 import os
 
-from isort import code
 from podpointclient.endpoints import API_BASE_URL, AUTH, CHARGE_SCHEDULES, PODS, SESSIONS, UNITS, USERS
 
 class Mocks:
