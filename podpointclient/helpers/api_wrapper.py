@@ -1,14 +1,10 @@
-from distutils.log import error
-from os import access
-from typing import Any, Dict
 import aiohttp
 import async_timeout
 import asyncio
-import logging
-import socket
-from datetime import datetime
-import re
+from typing import Any, Dict
 import time
+import logging
+from socket import gaierror
 
 from ..errors import APIError, AuthError, SessionError, ApiConnectionError
 
@@ -17,64 +13,39 @@ HEADERS = {"Content-type": "application/json; charset=UTF-8"}
 
 _LOGGER: logging.Logger = logging.getLogger(__package__)
 
-class Helpers:
-    def auth_headers(self, access_token: str) -> Dict[str, str]:
-        auth_header = {"Authorization": f"Bearer {access_token}"}
-        combined_headers = HEADERS.copy()
-        combined_headers.update(auth_header)
-        return combined_headers
-
-    def lazy_convert_to_datetime(self, date_string: str) -> datetime:
-        if date_string is None or type(date_string) is not str:
-            return None
-        
-        # Convert a 'Z' ending string to +00:00 for correct support
-        date_string = re.sub(r"Z$", "+00:00", date_string)
-
-        dt = None
-        # Example: 2022-01-25T09:00:00+00:00
-        try:
-            dt = datetime.fromisoformat(date_string)
-        except ValueError as e:
-            _LOGGER.warning("Tried to convert '%s' to datetime but got: %s", date_string, e)
-        
-        return dt
-
-    def lazy_iso_format_datetime(self, date_time: datetime) -> str:
-        if type(date_time) is not datetime:
-            return None
-
-        return date_time.isoformat()
-
 
 class APIWrapper:
+    """Wrapper around calls to the pod point api"""
     def __init__(self, session: aiohttp.ClientSession, timeout: int = TIMEOUT) -> None:
         self._timeout: int = timeout
         self._session: aiohttp.ClientSession = session
 
     async def get(self, url: str, headers: Dict[str, Any], params: Dict[str, Any] = None, exception_class=APIError) -> aiohttp.ClientResponse:
+        """Make a GET request"""
         return await self.__wrapper(method="get", url=url, params=params, headers=headers, exception_class=exception_class)
 
     async def put(self, url: str, body: Any, headers: Dict[str, Any], params: Dict[str, Any] = None, exception_class=APIError) -> aiohttp.ClientResponse:
+        """Make a PUT request"""
         return await self.__wrapper(method="put", url=url, params=params, data=body, headers=headers, exception_class=exception_class)
     
     async def post(self, url: str, body: Any, headers: Dict[str, Any], params: Dict[str, Any] = None, exception_class=APIError) -> aiohttp.ClientResponse:
+        """Make a POST request"""
         return await self.__wrapper(method="post", url=url, params=params, data=body, headers=headers, exception_class=exception_class)
 
     async def __wrapper(
         self,
         method: str,
         url: str,
-        data: Dict[str, Any] = {},
-        headers: Dict[str, Any] = {},
-        params: Dict[str, Any] = {},
+        data: Dict[str, Any] = Dict(),
+        headers: Dict[str, Any] = Dict(),
+        params: Dict[str, Any] = Dict(),
         exception_class=APIError
     ) -> aiohttp.ClientResponse:
         """Get information from the API."""
         try:
             async with async_timeout.timeout(self._timeout):
                 start_time = time.time()
-                _LOGGER.debug(f"{method.upper()} {url} {params}")
+                _LOGGER.debug("%s %s %s",method.upper(), url, params)
 
                 response = None
 
@@ -87,13 +58,13 @@ class APIWrapper:
                 elif method == "post":
                     response = await self._session.post(url, headers=headers, params=params, json=data)
                 else:
-                    raise ValueError("Method '%s' not supported", method)
+                    raise ValueError(f'Method \'{method}\' not supported')
 
                 if response is None:
                     raise APIError("Unexpected error from Pod Point API. Received a None response when querying.")
 
                 end_time = time.time()
-                _LOGGER.debug(f"{response.status} - {end_time - start_time}s")
+                _LOGGER.debug("%s - %ss", response.status, end_time - start_time)
 
                 if response.status < 200 or response.status > 202:
                     await self.__handle_response_error(response=response, exception_class=exception_class)
@@ -101,7 +72,7 @@ class APIWrapper:
                 return response
 
         except asyncio.TimeoutError as exception:
-            raise ApiConnectionError(f"Timeout error fetching information from {url} - {exception}")
+            raise ApiConnectionError(("Timeout error fetching information from %s - %s", url, exception)) from exception
 
         except (KeyError, TypeError) as exception:
             _LOGGER.error(
@@ -111,8 +82,8 @@ class APIWrapper:
             )
             raise exception
 
-        except (aiohttp.ClientError, socket.gaierror) as exception:
-            raise ApiConnectionError(f"Error connecting to Pod Point ({url}) - {exception}")
+        except (aiohttp.ClientError, gaierror) as exception:
+            raise ApiConnectionError(("Error connecting to Pod Point (%s) - %s", url, exception)) from exception
 
         except (AuthError, SessionError) as exception:
             _LOGGER.error("Authentication error when creating auth or session. (%s)", type(exception))

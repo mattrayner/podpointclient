@@ -1,15 +1,13 @@
 """Charge class, represents a 'Charge' from the podpoint apis"""
 
 from datetime import datetime
-from dataclasses import dataclass
 from typing import Dict, Any, List
-
-from dataclasses import field
-
-from podpointclient.helpers.helpers import Helpers
+from dataclasses import dataclass, field
+from podpointclient.helpers import lazy_convert_to_datetime
 
 @dataclass
 class ChargeDurationFormat:
+    """Representation of Format within Duration within Charge from pod point"""
     value: str = None
     unit: str  = None
 
@@ -18,14 +16,13 @@ class ChargeDurationFormat:
 
 
 class Charge:
+    """Representation of a Charge from pod point"""
     def __init__(self, data: Dict[str, Any]):
-        helpers = Helpers()
-
         self.id: int             = data.get('id', None)
         self.kwh_used: float     = data.get('kwh_used', 0.0)
         self.duration: int       = data.get('duration', 0)
-        self.starts_at: datetime = helpers.lazy_convert_to_datetime(data.get('starts_at', None))
-        self.ends_at: datetime   = helpers.lazy_convert_to_datetime(data.get('ends_at', None))
+        self.starts_at: datetime = lazy_convert_to_datetime(data.get('starts_at', None))
+        self.ends_at: datetime   = lazy_convert_to_datetime(data.get('ends_at', None))
         self.energy_cost: int    = data.get('energy_cost', None)
 
         charging_duration_data = data.get('charging_duration', {})
@@ -58,17 +55,19 @@ class Charge:
 
     @property
     def home(self) -> bool:
+        """Is this a 'home' charge?"""
         return self.location.home
 
 
     @dataclass
     class ChargingDuration:
+        """Representation of a Duration within a Charge from pod point"""
         raw: int                                = None
         formatted: 'list[ChargeDurationFormat]' = field(default_factory=list)
 
         def __init__(self, raw: int, formatted: List[Dict[str,str]]) -> None:
             self.raw = raw
-            self.formatted: list[ChargeDurationFormat] = []
+            self.formatted: List[ChargeDurationFormat] = []
 
             if formatted is not None and len(formatted) > 0:
                 for formatted_data in formatted:
@@ -80,11 +79,15 @@ class Charge:
                     )
 
         def __str__(self) -> str:
-            return " ".join(list(filter(None, map(lambda x: str(x) ,self.formatted))))
+            def to_str(x):
+                return str(x)
+
+            return " ".join(list(filter(None, map(to_str ,self.formatted))))
 
 
     @dataclass
     class BillingEvent:
+        """Represents a Billing Event from pod point"""
         id: int                   = None
         amount: Any               = None
         currency: Any             = None
@@ -95,6 +98,7 @@ class Charge:
 
     @dataclass
     class Location:
+        """Represents a Location within a charge from pod point"""
         def __init__(self, data: Dict[str, Any]):
             self.id       = data.get('id', None)
             self.home     = data.get('home', None)
@@ -109,15 +113,18 @@ class Charge:
 
         @dataclass
         class Address:
+            """Represents an address within a Location within a Charge from Pod Point"""
             id: int            = None
             business_name: str = ""
 
 
     @dataclass
     class Pod:
+        """Represents a Pod within a Charge from pod point"""
         id: int = None
 
     @dataclass
     class Organisation:
+        """Repreents an Organisation within a Charge from pod point"""
         id: int   = None
         name: str = None

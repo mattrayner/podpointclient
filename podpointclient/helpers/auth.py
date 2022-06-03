@@ -1,3 +1,5 @@
+"""Auth module for pod point, handled access token lifecycle."""
+
 import logging
 from datetime import datetime, timedelta
 
@@ -6,7 +8,8 @@ import aiohttp
 from ..errors import APIError, AuthError, SessionError
 from .session import Session
 from ..endpoints import API_BASE_URL, AUTH
-from .helpers import APIWrapper, HEADERS
+from podpointclient.helpers import HEADERS
+from .api_wrapper import APIWrapper
 
 _LOGGER: logging.Logger = logging.getLogger(__package__)
 
@@ -22,6 +25,7 @@ class Auth():
 
     @property
     def user_id(self):
+        """Return the user_id for a given session"""
         if self._session:
             return self._session.user_id
         return None
@@ -52,10 +56,16 @@ class Auth():
 
             if access_token_updated:
                 _LOGGER.debug(
-                    f"Updated access token. New expiration: {self.access_token_expiry}"
+                    "Updated access token. New expiration: %s",
+                    self.access_token_expiry
                 )
 
-                self._session = Session(email=self.email, password=self.password, access_token=self.access_token, session=self._session)
+                self._session = Session(
+                    email=self.email,
+                    password=self.password,
+                    access_token=self.access_token,
+                    session=self._session
+                )
                 session_created = await self._session.create()
 
                 if session_created is False:
@@ -63,7 +73,7 @@ class Auth():
             else:
                 _LOGGER.error("Error updating access token")
 
-            return (access_token_updated and session_created)
+            return access_token_updated and session_created
         except AuthError as exception:
             _LOGGER.error("Error updating access token. %s", exception)
             raise exception
@@ -79,7 +89,11 @@ class Auth():
 
         try:
             wrapper = APIWrapper(session=self._session)
-            response = await wrapper.post(url, body=payload, headers=HEADERS, exception_class=AuthError)
+            response = await wrapper.post(
+                url,
+                body=payload,
+                headers=HEADERS,
+                exception_class=AuthError)
 
             if response.status != 200:
                 await self.__handle_response_error(response, AuthError)
@@ -93,9 +107,16 @@ class Auth():
         except AuthError as exception:
             raise exception
         except KeyError as exception:
-            raise AuthError(response.status, f"Error processing access token response. {exception} not found in json.")
+            raise AuthError(
+                response.status,
+                f"Error processing access token response. {exception} not found in json."
+            ) from exception
         except TypeError as exception:
-            raise AuthError(response.status, f"Error processing access token response. When calculating expiry date, got: {exception}.")
+            raise AuthError(
+                response.status,
+                f"Error processing access token response. \
+When calculating expiry date, got: {exception}."
+            ) from exception
         except APIError as exception:
             raise exception
 

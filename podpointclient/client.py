@@ -1,14 +1,16 @@
 """Sample API Client."""
 import logging
-from typing import Optional, Dict, Any, List
+from typing import Dict, Any, List
+from datetime import datetime
+
 import aiohttp
-from datetime import datetime, timedelta
 
 from podpointclient.schedule import Schedule
 
 from .endpoints import API_BASE_URL, CHARGE_SCHEDULES, PODS, UNITS, USERS, CHARGES
 from .helpers.auth import Auth
-from .helpers.helpers import APIWrapper, Helpers
+from .helpers import auth_headers
+from .helpers.api_wrapper import APIWrapper
 from .factories import PodFactory, ScheduleFactory, ChargeFactory
 from .pod import Pod
 
@@ -23,7 +25,11 @@ class PodPointClient:
     """API Client for communicating with Pod Point."""
 
     def __init__(
-        self, username: str, password: str, session: aiohttp.ClientSession = aiohttp.ClientSession(), include_timestamp: bool = False
+        self,
+        username: str,
+        password: str,
+        session: aiohttp.ClientSession = aiohttp.ClientSession(),
+        include_timestamp: bool = False
     ) -> None:
         """Pod Point API Client."""
         self.email = username
@@ -49,8 +55,7 @@ class PodPointClient:
         if self.include_timestamp:
             params = self._add_timestamp_to_params(params)
 
-        helpers = Helpers()
-        headers = helpers.auth_headers(access_token=self.auth.access_token)
+        headers = auth_headers(access_token=self.auth.access_token)
 
         response = await self.api_wrapper.get(url=url, params=params, headers=headers)
 
@@ -73,17 +78,18 @@ class PodPointClient:
         unit_id = pod.unit_id
 
         _LOGGER.debug(
-            f"Updating pod schedule for unit {unit_id}. Enabling schedule: {enabled}"
+            "Updating pod schedule for unit %s. Enabling schedule: %s",
+            unit_id,
+            enabled
         )
-        
+
         path = f"{UNITS}/{unit_id}{CHARGE_SCHEDULES}"
         url = f"{API_BASE_URL}{path}"
         params = None
         if self.include_timestamp:
             params = self._add_timestamp_to_params({})
 
-        helpers = Helpers()
-        headers = helpers.auth_headers(access_token=self.auth.access_token)
+        headers = auth_headers(access_token=self.auth.access_token)
         payload = self._schedule_data(enabled=enabled)
 
         response = await self.api_wrapper.put(url=url, body=payload, headers=headers, params=params)
@@ -92,7 +98,11 @@ class PodPointClient:
             return True
         else:
             text = await response.text()
-            _LOGGER.warn("Expected to recieve 201 status code when creating schedules. Got (%s) - %s", response.status, text)
+            _LOGGER.warning(
+                "Expected to recieve 201 status code when creating schedules. Got (%s) - %s",
+                response.status,
+                text
+            )
             return False
 
     async def async_get_charges(self, per_page: str = "5", page: str = "1"):
@@ -105,8 +115,7 @@ class PodPointClient:
         if self.include_timestamp:
             params = self._add_timestamp_to_params(params)
 
-        helpers = Helpers()
-        headers = helpers.auth_headers(access_token=self.auth.access_token)
+        headers = auth_headers(access_token=self.auth.access_token)
 
         response = await self.api_wrapper.get(url=url, params=params, headers=headers)
 
