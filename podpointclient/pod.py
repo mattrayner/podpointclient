@@ -1,16 +1,18 @@
+"""Representation of a Pod from pod point"""
 from dataclasses import dataclass
 from datetime import datetime
-from sqlite3 import DatabaseError
 from typing import Dict, Any, List
-from .schedule import Schedule, ScheduleStatus
 from enum import auto
-from strenum import StrEnum, KebabCaseStrEnum
-from .helpers.helpers import Helpers
-from .charge import Charge
 import json
+from strenum import StrEnum, KebabCaseStrEnum
+
+from .helpers.functions import lazy_convert_to_datetime, lazy_iso_format_datetime
+from .schedule import Schedule, ScheduleStatus
+from .charge import Charge
 
 
 class StatusName(StrEnum):
+    """An ENUM representing the statuses for a given connector/door on a pod point pod"""
     AVAILABLE      = "Available"
     UNAVAILABLE    = "Unavailable"
     CHARGING       = "Charging"
@@ -18,6 +20,7 @@ class StatusName(StrEnum):
 
 
 class StatusKeyName(KebabCaseStrEnum):
+    """"An ENUM representing the status key names for a pod connector/door"""
     AVAILABLE      = auto()
     UNAVAILABLE    = auto()
     CHARGING       = auto()
@@ -26,6 +29,7 @@ class StatusKeyName(KebabCaseStrEnum):
 
 @dataclass
 class Socket:
+    """Representation of a Socket within a Connector within a Pod from pod point"""
     type: str
     description: str
     ocpp_name: str
@@ -33,6 +37,7 @@ class Socket:
 
     @property
     def dict(self):
+        """Dictionary conversion for a Socket"""
         return {
             "type": self.type,
             "description": self.description,
@@ -41,13 +46,13 @@ class Socket:
         }
 
     def to_json(self):
+        """JSON representation of a socket"""
         return json.dumps(self.dict, ensure_ascii=False)
 
 
 class Pod:
+    """Representation of a Pod from pod point"""
     def __init__(self, data: Dict[str, Any]):
-        helpers = Helpers()
-
         self.id: int                   = data.get('id', None)
         self.name: str                 = data.get('name', None)
         self.ppid: str                 = data.get('ppid', None)
@@ -57,14 +62,14 @@ class Pod:
         self.ev_zone: bool              = data.get('evZone', None)
         self.address_id: int           = data.get('address_id', None)
         self.description: str          = data.get('description', "")
-        self.commissioned_at: datetime = helpers.lazy_convert_to_datetime(data.get('commissioned_at', None))
-        self.created_at: datetime      = helpers.lazy_convert_to_datetime(data.get('created_at', None))
-        self.last_contact_at: datetime = helpers.lazy_convert_to_datetime(data.get('last_contact_at', None))
+        self.commissioned_at: datetime = lazy_convert_to_datetime(data.get('commissioned_at', None))
+        self.created_at: datetime      = lazy_convert_to_datetime(data.get('created_at', None))
+        self.last_contact_at: datetime = lazy_convert_to_datetime(data.get('last_contact_at', None))
         self.contactless_enabled: bool = data.get('contactless_enabled', None)
         self.unit_id: int              = data.get('unit_id', None)
         self.timezone: str             = data.get('timezone', None)
         self.price: int                = data.get('price', None)
-        self.charges: List[Charge]     = list()
+        self.charges: List[Charge]     = []
         self.total_kwh: float          = 0.0
         self.total_charge_seconds: int = 0
         self.current_kwh: float        = 0.0
@@ -149,12 +154,11 @@ class Pod:
                     status = status_obj
                 )
             )
-    
+
     @property
     def dict(self) -> Dict[str, Any]:
-        helpers = Helpers()
-        
-        d = {
+        """Dictionary representaion of a Pod"""
+        dictionary = {
             "id": self.id,
             "name": self.name,
             "ppid": self.ppid,
@@ -165,9 +169,9 @@ class Pod:
             "location": self.location.dict,
             "address_id": self.address_id,
             "description": self.description,
-            "commissioned_at": helpers.lazy_iso_format_datetime(self.commissioned_at),
-            "created_at": helpers.lazy_iso_format_datetime(self.created_at),
-            "last_contact_at": helpers.lazy_iso_format_datetime(self.last_contact_at),
+            "commissioned_at": lazy_iso_format_datetime(self.commissioned_at),
+            "created_at": lazy_iso_format_datetime(self.created_at),
+            "last_contact_at": lazy_iso_format_datetime(self.last_contact_at),
             "contactless_enabled": self.contactless_enabled,
             "unit_id": self.unit_id,
             "timezone": self.timezone,
@@ -182,24 +186,26 @@ class Pod:
         }
 
         for status in self.statuses:
-            d['statuses'].append(status.dict)
+            dictionary['statuses'].append(status.dict)
 
         for unit_connector in self.unit_connectors:
-            d['unit_connectors'].append(
+            dictionary['unit_connectors'].append(
                 { "connector": unit_connector.dict }
             )
 
         for charge_schedule in self.charge_schedules:
-            d['charge_schedules'].append(charge_schedule.dict)
+            dictionary['charge_schedules'].append(charge_schedule.dict)
 
-        return d
-    
-    def to_json(self):
+        return dictionary
+
+    def to_json(self) -> str:
+        """JSON representation of a Pod"""
         return json.dumps(self.dict, ensure_ascii=False)
 
 
     @dataclass
     class Model:
+        """Representation of a Model within a Pod from pod point"""
         id: int
         name: str
         vendor: str
@@ -209,11 +215,13 @@ class Pod:
         image_url: str = None
 
         @property
-        def model(self):
+        def model(self) -> str:
+            """Returns the model name"""
             return self.name
 
         @property
-        def dict(self):
+        def dict(self) -> Dict[str, Any]:
+            """A dictionary representation of a Model"""
             return {
                 "id": self.id,
                 "name": self.name,
@@ -224,28 +232,33 @@ class Pod:
                 "image_url": self.image_url
             }
 
-        def to_json(self):
+        def to_json(self) -> str:
+            """JSON representation of a Model"""
             return json.dumps(self.dict, ensure_ascii=False)
 
 
     @dataclass
     class Location:
+        """Representation of a Location within a Pod from pod point"""
         lat: float
         lng: float
 
         @property
-        def dict(self):
+        def dict(self) -> Dict[str, str]:
+            """Dictionary representation of a Locatiom"""
             return {
                 "lat": self.lat,
                 "lng": self.lng
             }
 
-        def to_json(self):
+        def to_json(self) -> str:
+            """JSON representation of a Location"""
             return json.dumps(self.dict, ensure_ascii=False)
 
-    
+
     @dataclass
     class Status:
+        """Representation of a Status within a Pod from pod point"""
         id: int
         name: StatusName
         key_name: StatusKeyName
@@ -254,7 +267,8 @@ class Pod:
         door_id: int
 
         @property
-        def dict(self):
+        def dict(self) -> Dict[str, Any]:
+            """Dictionary representation of a Status"""
             return {
                 "id": self.id,
                 "name": self.name,
@@ -264,12 +278,14 @@ class Pod:
                 "door_id": self.door_id
             }
 
-        def to_json(self):
+        def to_json(self) -> str:
+            """JSON representation of a Status"""
             return json.dumps(self.dict, ensure_ascii=False)
 
-    
+
     @dataclass
     class Connector:
+        """Representation of a Connector within a Pod from pod point"""
         id: int
         door: str
         door_id: int
@@ -281,7 +297,8 @@ class Pod:
         socket: Socket
 
         @property
-        def dict(self):
+        def dict(self) -> Dict[str, any]:
+            """Dictionary representation of a Connector"""
             return {
                 "id": self.id,
                 "door": self.door,
@@ -294,5 +311,6 @@ class Pod:
                 "socket": self.socket.dict
             }
 
-        def to_json(self):
+        def to_json(self) -> str:
+            """JSON representation of a Connector"""
             return json.dumps(self.dict, ensure_ascii=False)

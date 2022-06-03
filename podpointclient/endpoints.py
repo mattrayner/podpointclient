@@ -1,3 +1,5 @@
+"""Endpoints from PodPoint"""
+
 AUTH = '/auth'
 SESSIONS = '/sessions'
 USERS = '/users'

@@ -1,1 +1,1 @@
-"""Initialise"""
+"""Helpers module"""
