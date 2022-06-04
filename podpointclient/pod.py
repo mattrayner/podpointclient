@@ -6,7 +6,7 @@ from enum import auto
 import json
 from strenum import StrEnum, KebabCaseStrEnum
 
-from .helpers import lazy_convert_to_datetime, lazy_iso_format_datetime
+from .helpers.functions import lazy_convert_to_datetime, lazy_iso_format_datetime
 from .schedule import Schedule, ScheduleStatus
 from .charge import Charge
 
@@ -69,7 +69,7 @@ class Pod:
         self.unit_id: int              = data.get('unit_id', None)
         self.timezone: str             = data.get('timezone', None)
         self.price: int                = data.get('price', None)
-        self.charges: List[Charge]     = list()
+        self.charges: List[Charge]     = []
         self.total_kwh: float          = 0.0
         self.total_charge_seconds: int = 0
         self.current_kwh: float        = 0.0

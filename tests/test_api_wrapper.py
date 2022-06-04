@@ -1,7 +1,7 @@
 from urllib import response
 import aiohttp
 from podpointclient.errors import APIError, ApiConnectionError
-from podpointclient.helpers.helpers import APIWrapper
+from podpointclient.helpers.api_wrapper import APIWrapper
 import pytest
 from aioresponses import aioresponses
 

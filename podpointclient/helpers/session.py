@@ -1,7 +1,7 @@
 """Session module handled session lifecycle"""
 import logging
 import aiohttp
-from podpointclient.helpers import auth_headers
+from .functions import auth_headers
 
 from ..errors import SessionError
 from ..endpoints import API_BASE_URL, SESSIONS
@@ -35,7 +35,12 @@ class Session:
 
         try:
             wrapper = APIWrapper(session=self._session)
-            response = await wrapper.post(url, body=payload, headers=headers, exception_class=SessionError)
+            response = await wrapper.post(
+                url,
+                body=payload,
+                headers=headers,
+                exception_class=SessionError
+            )
 
             json = await response.json()
 

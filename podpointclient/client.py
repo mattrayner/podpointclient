@@ -9,7 +9,7 @@ from podpointclient.schedule import Schedule
 
 from .endpoints import API_BASE_URL, CHARGE_SCHEDULES, PODS, UNITS, USERS, CHARGES
 from .helpers.auth import Auth
-from .helpers import auth_headers
+from .helpers.functions import auth_headers
 from .helpers.api_wrapper import APIWrapper
 from .factories import PodFactory, ScheduleFactory, ChargeFactory
 from .pod import Pod
@@ -36,8 +36,8 @@ class PodPointClient:
         self.password = password
         self._session = session
         self.auth = Auth(
-            email=self.email, 
-            password=self.password, 
+            email=self.email,
+            password=self.password,
             session=self._session
         )
         self.api_wrapper = APIWrapper(session=self._session)
@@ -96,14 +96,14 @@ class PodPointClient:
 
         if response.status == 201:
             return True
-        else:
-            text = await response.text()
-            _LOGGER.warning(
-                "Expected to recieve 201 status code when creating schedules. Got (%s) - %s",
-                response.status,
-                text
-            )
-            return False
+
+        text = await response.text()
+        _LOGGER.warning(
+            "Expected to recieve 201 status code when creating schedules. Got (%s) - %s",
+            response.status,
+            text
+        )
+        return False
 
     async def async_get_charges(self, per_page: str = "5", page: str = "1"):
         """Get charges from the API."""

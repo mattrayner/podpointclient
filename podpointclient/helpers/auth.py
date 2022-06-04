@@ -8,7 +8,7 @@ import aiohttp
 from ..errors import APIError, AuthError, SessionError
 from .session import Session
 from ..endpoints import API_BASE_URL, AUTH
-from podpointclient.helpers import HEADERS
+from .functions import HEADERS
 from .api_wrapper import APIWrapper
 
 _LOGGER: logging.Logger = logging.getLogger(__package__)
@@ -39,10 +39,7 @@ class Auth():
             access_token_set and datetime.now() < self.access_token_expiry
         )
 
-        if access_token_set and access_token_not_expired:
-            return True
-        else:
-            return False
+        return bool(access_token_set and access_token_not_expired)
 
     async def async_update_access_token(self) -> bool:
         """Update access token, if needed."""

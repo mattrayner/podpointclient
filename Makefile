@@ -1,6 +1,8 @@
-.PHONY: clean package publish
+.PHONY: spec test lint clean package publish
 
-test:
+test: spec
+
+spec:
 	python3 -m pytest \
 		-vv \
 		-qq \
@@ -12,6 +14,9 @@ test:
 		-o console_output_style=count \
 		-p no:sugar \
 		tests
+
+lint:
+	pylint ./podpointclient
 
 clean:
 	rm -r dist/*

@@ -15,7 +15,7 @@ class Schedule:
     end_day: int
     end_time: str
     status: ScheduleStatus
-    uid: str = None # Optional uid value - when creating new schedules uid is not required and is easier to ommit
+    uid: str = None # Optional uid value - new schedules dont require uid and is easier to ommit
 
     @property
     def is_active(self):

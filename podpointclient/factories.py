@@ -10,7 +10,7 @@ class PodFactory:
         """Build a number of pod objects based off of a response from pod point"""
         pods = []
 
-        pods_data = pods_response.get('pods', None) 
+        pods_data = pods_response.get('pods', None)
         if pods_data is None:
             return pods
 
@@ -21,12 +21,17 @@ class PodFactory:
 
 class ScheduleFactory:
     """Factory for creating Schedule objects"""
-    def build_schedules(self, enabled: bool, start_time: str = "00:00:00", end_time: str = "00:00:01") -> List[Schedule]:
+    def build_schedules(
+        self,
+        enabled: bool,
+        start_time: str = "00:00:00",
+        end_time: str = "00:00:01"
+    ) -> List[Schedule]:
         """Build a number of schedule objects based off of a response from pod point"""
         schedules = []
 
-        for i in range(7):
-            day = i + 1
+        for iterator in range(7):
+            day = iterator + 1
 
             schedule = Schedule(
                 start_day=day,
@@ -47,7 +52,7 @@ class ChargeFactory:
         """Build a list of charge objects based off of a response from pod point"""
         charges = []
 
-        charge_data = charge_response.get('charges', None) 
+        charge_data = charge_response.get('charges', None)
         if charge_data is None:
             return charges
 

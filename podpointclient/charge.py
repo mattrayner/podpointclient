@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import Dict, Any, List
 from dataclasses import dataclass, field
-from podpointclient.helpers import lazy_convert_to_datetime
+from .helpers.functions import lazy_convert_to_datetime
 
 @dataclass
 class ChargeDurationFormat:
@@ -79,10 +79,10 @@ class Charge:
                     )
 
         def __str__(self) -> str:
-            def to_str(x):
-                return str(x)
+            def dt_to_str(date_time: datetime) -> str:
+                return str(date_time)
 
-            return " ".join(list(filter(None, map(to_str ,self.formatted))))
+            return " ".join(list(filter(None, map(dt_to_str ,self.formatted))))
 
 
     @dataclass
