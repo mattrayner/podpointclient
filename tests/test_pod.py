@@ -51,6 +51,12 @@ def test_empty_pod():
     assert pod.statuses == []
     assert pod.unit_connectors == []
     assert pod.charge_schedules == []
+    assert pod.total_kwh == 0.0
+    assert pod.total_charge_seconds == 0
+    assert pod.current_kwh == 0.0
+    assert pod.total_cost == 0
+    assert pod.currancy == ""
+    assert pod.current_cost == 0
 
 
 def test_happy_path():
