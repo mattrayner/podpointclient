@@ -184,7 +184,9 @@ class Pod:
             "charge_schedules": [],
             "total_kwh": self.total_kwh,
             "total_charge_seconds": self.total_charge_seconds,
-            "current_kwh": self.current_kwh
+            "current_kwh": self.current_kwh,
+            "total_cost": self.total_cost,
+            "current_cost": self.current_cost
         }
 
         for status in self.statuses:
