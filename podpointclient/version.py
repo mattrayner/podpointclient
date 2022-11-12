@@ -1,3 +1,3 @@
 """Version for the podpointclient library"""
 
-__version__ = "0.3.0-rc1"
+__version__ = "0.3.0"
