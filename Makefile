@@ -19,7 +19,7 @@ lint:
 	pylint ./podpointclient
 
 clean:
-	rm -r dist/*
+	rm -rf dist/*
 
 package:
 	python3 setup.py sdist
