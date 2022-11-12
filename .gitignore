@@ -3,3 +3,4 @@ dist
 podpointclient.egg-info
 *.pyc
 .coverage
+venv

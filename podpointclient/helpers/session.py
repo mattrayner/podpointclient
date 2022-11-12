@@ -16,7 +16,8 @@ class Session:
         email: str,
         password: str,
         access_token: str,
-        session: aiohttp.ClientSession
+        session: aiohttp.ClientSession,
+        http_debug: bool = None
     ) -> None:
         self.email: str = email
         self.password: str = password
@@ -24,6 +25,7 @@ class Session:
         self.session_id: str = None
         self.user_id: str = None
         self._session: aiohttp.ClientSession = session
+        self._http_debug: bool = http_debug if http_debug is not None else False
 
     async def create(self):
         """Create a session using credentials passed in initialisation"""
@@ -43,6 +45,9 @@ class Session:
             )
 
             json = await response.json()
+
+            if self._http_debug:
+                _LOGGER.debug(json)
 
             if json['sessions']:
                 self.user_id = json['sessions']['user_id']

@@ -15,13 +15,14 @@ _LOGGER: logging.Logger = logging.getLogger(__package__)
 
 class Auth():
     """Manages authentication lifecycle for a user"""
-    def __init__(self, email: str, password: str, session: aiohttp.ClientSession):
+    def __init__(self, email: str, password: str, session: aiohttp.ClientSession, http_debug: bool = None):
         self.email: str = email
         self.password: str = password
         self.access_token: str = None
         self.access_token_expiry: datetime = None
         self._session: aiohttp.ClientSession = session
         self._api_wrapper: APIWrapper = APIWrapper(session=self._session)
+        self._http_debug: bool = http_debug if http_debug is not None else False
 
     @property
     def user_id(self):
@@ -61,7 +62,8 @@ class Auth():
                     email=self.email,
                     password=self.password,
                     access_token=self.access_token,
-                    session=self._session
+                    session=self._session,
+                    http_debug=self._http_debug
                 )
                 session_created = await self._session.create()
 
@@ -101,6 +103,9 @@ class Auth():
                 seconds=json["expires_in"] - 10
             )
             return_value = True
+
+            if self._http_debug:
+                _LOGGER.debug(json)
         except AuthError as exception:
             raise exception
         except KeyError as exception:

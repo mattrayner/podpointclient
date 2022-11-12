@@ -25,20 +25,23 @@ class PodPointClient:
     """API Client for communicating with Pod Point."""
 
     def __init__(
-        self,
+        self,   
         username: str,
         password: str,
         session: aiohttp.ClientSession = aiohttp.ClientSession(),
-        include_timestamp: bool = False
+        include_timestamp: bool = False,
+        http_debug: bool = None
     ) -> None:
         """Pod Point API Client."""
         self.email = username
         self.password = password
         self._session = session
+        self._http_debug = http_debug if http_debug is not None else False
         self.auth = Auth(
             email=self.email,
             password=self.password,
-            session=self._session
+            session=self._session,
+            http_debug=self._http_debug
         )
         self.api_wrapper = APIWrapper(session=self._session)
         self.include_timestamp = include_timestamp
@@ -60,6 +63,9 @@ class PodPointClient:
         response = await self.api_wrapper.get(url=url, params=params, headers=headers)
 
         json = await response.json()
+
+        if self._http_debug:
+            _LOGGER.debug(json)
 
         factory = PodFactory()
         pods = factory.build_pods(pods_response=json)
@@ -120,6 +126,9 @@ class PodPointClient:
         response = await self.api_wrapper.get(url=url, params=params, headers=headers)
 
         json = await response.json()
+
+        if self._http_debug:
+            _LOGGER.debug(json)
 
         factory = ChargeFactory()
         charges = factory.build_charges(charge_response=json)
