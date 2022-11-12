@@ -23,7 +23,7 @@ class Charge:
         self.duration: int       = data.get('duration', 0)
         self.starts_at: datetime = lazy_convert_to_datetime(data.get('starts_at', None))
         self.ends_at: datetime   = lazy_convert_to_datetime(data.get('ends_at', None))
-        self.energy_cost: int    = data.get('energy_cost', None)
+        self.energy_cost: int    = data.get('energy_cost', 0)
 
         charging_duration_data = data.get('charging_duration', {})
         self.charging_duration = self.ChargingDuration(

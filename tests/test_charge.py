@@ -7,6 +7,9 @@ def test_charge():
     ongoing_charge_data = charges_data[0]
     completed_charge_data = charges_data[1]
 
+    empty_charge = Charge(data={})
+    assert empty_charge.energy_cost == 0
+
     ongoing_charge = Charge(data=ongoing_charge_data)
     assert 1 == ongoing_charge.id
     assert 12.2 == ongoing_charge.kwh_used
