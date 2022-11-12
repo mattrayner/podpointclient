@@ -74,7 +74,6 @@ class Pod:
         self.total_charge_seconds: int = 0
         self.current_kwh: float        = 0.0
         self.total_cost: int           = 0
-        self.currency: str             = ""
         self.current_cost: int         = 0
 
         model_data = data.get('model', {})
