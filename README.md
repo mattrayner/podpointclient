@@ -22,10 +22,13 @@ The [Pod Point Client][pod_point_client] supports the following methods:
 
 Method | Description
 ---|---
-`async_get_pods()` | *Get all pods from a user's account* - Returns a list of `Pod` objects.
+`async_credentials_verified()` | *Verify that the credentials we have can pull _atleast_ one Pod* - Returns `bool`.
+`async_get_all_pods(includes=[])` | *Get all pods from a user's account* - Returns a list of `Pod` objects. Optional `includes` can be used to change what will be returned. Defaults to all data.
+`async_get_pods(perpage=5, page=2, includes=[])` | *Get pods from a user's account* - Returns a list of `Pod` objects. `perpage` can be 'all', or a number. Can get additional pages with `page` attribute. `includes` is a list of additional information pulled for the Pod. Pass an empty list to `includes` for minimal information or `None` for full data (defaults to `None`).
 `async_get_pod(pod_id=1234)` | *Gets an individual pod* - Returns a single `Pod`. *_NOTE: The Pod Point API does not support a single-pod return so this method gets all pods and filters._*
 `async_set_schedule(enabled=False, pod=pod)` | *Updates a pod with a week of schedules that will enable or disable charging* - See setting charging schedules for more information on how this works.
-`async_get_charges(per_page=5, page=2)` | *Get charges for a user* - Returns a list of `Charge` objects. `per_page` can be 'all', or a number. Can get additional pages with `page` attribute.
+`async_get_all_charges()` | *Get all charges from a user's account* - Returns a list of `Charge` objects.
+`async_get_charges(perpage=5, page=2)` | *Get charges for a user* - Returns a list of `Charge` objects. `perpage` can be 'all', or a number. Can get additional pages with `page` attribute.
 
 ### Example
 
@@ -43,8 +46,12 @@ from podpointclient import PodPointClient
 # Create a client
 client = PodPointClient(username="test@example.com", password="passw0rd!1")
 
+# Verify credentials work
+verified = await client.async_credentials_verified()
+print(verified)
+
 # Get all pods for a user
-pods = await client.async_get_pods()
+pods = await client.async_get_all_pods()
 
 # Select one to update schedules for
 pod = pods[0]
@@ -57,6 +64,11 @@ pod = await client.async_get_pod(pod_id=pod.id)
 # Check if the schedule is disabled
 schedule_status = pod.charge_schedules[0].is_active
 print(schedule_status)
+
+# Print last charge energy use
+charges = await client.async_get_charges(perpage=1, page=1)
+energy_used = charges[0].kwh_used
+print(energy_used)
 ```
 
 ### Setting charging schedules

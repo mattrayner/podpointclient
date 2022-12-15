@@ -1,7 +1,7 @@
 import json
 import os
 
-from podpointclient.endpoints import API_BASE_URL, AUTH, CHARGE_SCHEDULES, PODS, SESSIONS, UNITS, USERS
+from podpointclient.endpoints import API_BASE_URL, AUTH, CHARGE_SCHEDULES, PODS, SESSIONS, UNITS, USERS, CHARGES
 
 class Mocks:
     def __init__(self, m = None) -> None:
@@ -12,6 +12,7 @@ class Mocks:
         session_response = self.session_response()
         pods_response = self.pods_response()
         pods_response_schedule_disabled = self.pods_response_schedule_disabled()
+        charges_response = self.charges_response()
 
         timestamp = ""
         and_timestamp = ""
@@ -23,9 +24,11 @@ class Mocks:
 
         self.m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
         self.m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
-        self.m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?perpage=all&include=statuses,price,model,unit_connectors,charge_schedules{and_timestamp}', payload=pods_response)
+        self.m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?perpage=1&page=1{and_timestamp}', payload=pods_response)
+        self.m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?perpage=5&page=1&include=statuses,price,model,unit_connectors,charge_schedules{and_timestamp}', payload=pods_response)
         self.m.put(f'{API_BASE_URL}{UNITS}/198765{CHARGE_SCHEDULES}{question_timestamp}', payload=pods_response, status=201)
-        self.m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?perpage=all&include=statuses,price,model,unit_connectors,charge_schedules{and_timestamp}', payload=pods_response_schedule_disabled)
+        self.m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?perpage=5&page=1&include=statuses,price,model,unit_connectors,charge_schedules{and_timestamp}', payload=pods_response_schedule_disabled)
+        self.m.get(f'{API_BASE_URL}{USERS}/1234{CHARGES}?perpage=1&page=1{and_timestamp}', payload=charges_response)
 
     def auth_response(self):
         return self.__json_load_fixture('auth')
@@ -59,6 +62,9 @@ class Mocks:
 
     def complete_pod_schedule_disabled(self):
         return self.__json_load_fixture('complete_pod_disabled_schedule')
+    
+    def charges_response(self):
+        return self.__json_load_fixture('complete_charges')
 
     def __json_load_fixture(self, fixture_name: str):
         file_location = os.path.dirname(__file__)

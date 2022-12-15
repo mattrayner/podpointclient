@@ -29,18 +29,14 @@ class Session:
 
     async def create(self):
         """Create a session using credentials passed in initialisation"""
-        url = f"{API_BASE_URL}{SESSIONS}"
-        headers = auth_headers(self.access_token)
-        payload = {"email": self.email, "password": self.password}
-
         return_value = False
 
         try:
             wrapper = APIWrapper(session=self._session)
             response = await wrapper.post(
-                url,
-                body=payload,
-                headers=headers,
+                url=f"{API_BASE_URL}{SESSIONS}",
+                body={"email": self.email, "password": self.password},
+                headers=auth_headers(self.access_token),
                 exception_class=SessionError
             )
 

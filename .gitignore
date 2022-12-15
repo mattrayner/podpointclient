@@ -4,4 +4,6 @@ podpointclient.egg-info
 *.pyc
 .coverage
 venv
+.venv
+.vscode
 .idea
