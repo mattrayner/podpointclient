@@ -57,10 +57,10 @@ class PodPointClient:
 
     async def async_get_all_pods(
         self,
+        perpage: Union[str, int] = 5,
         includes: Union[List[str], None] = None
     ) -> List[Pod]:
         """Get all pods from the API"""
-        perpage = 5
         page = 1
         pods: List[Pod] = []
 
@@ -146,10 +146,10 @@ class PodPointClient:
         return False
 
     async def async_get_all_charges(
-        self
+        self,
+        perpage: Union[str, int] = 50
     ) -> List[Charge]:
         """Get all charges from the API"""
-        perpage = 5
         page = 1
         charges: List[Charge] = []
 
