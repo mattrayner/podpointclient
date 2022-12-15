@@ -17,8 +17,13 @@ async def test_readme():
             # Create a client
             client = PodPointClient(username="test@example.com", password="passw0rd!1", session=session)
 
+            # Verify credentials work
+            verified = await client.async_credentials_verified()
+            print(verified)
+            assert verified is True
+
             # Get all pods for a user
-            pods = await client.async_get_pods()
+            pods = await client.async_get_all_pods()
             assert len(pods) == 1
             
             # Select one to update schedules for
@@ -35,3 +40,9 @@ async def test_readme():
             schedule_status = pod.charge_schedules[0].is_active
             print(schedule_status)
             assert schedule_status is False
+
+            # Print last charge energy use
+            charges = await client.async_get_charges(perpage=1, page=1)
+            energy_used = charges[0].kwh_used
+            print(energy_used)
+            assert energy_used == 12.2

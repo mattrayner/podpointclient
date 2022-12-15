@@ -15,7 +15,13 @@ _LOGGER: logging.Logger = logging.getLogger(__package__)
 
 class Auth():
     """Manages authentication lifecycle for a user"""
-    def __init__(self, email: str, password: str, session: aiohttp.ClientSession, http_debug: bool = None):
+    def __init__(
+        self,
+        email: str,
+        password: str,
+        session: aiohttp.ClientSession,
+        http_debug: bool = None
+    ):
         self.email: str = email
         self.password: str = password
         self.access_token: str = None
@@ -83,14 +89,11 @@ class Auth():
     async def __update_access_token(self) -> bool:
         return_value = False
 
-        url = f"{API_BASE_URL}{AUTH}"
-        payload = {"username": self.email, "password": self.password}
-
         try:
             wrapper = APIWrapper(session=self._session)
             response = await wrapper.post(
-                url,
-                body=payload,
+                url=f"{API_BASE_URL}{AUTH}",
+                body={"username": self.email, "password": self.password},
                 headers=HEADERS,
                 exception_class=AuthError)
 

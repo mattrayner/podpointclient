@@ -1,11 +1,9 @@
-"""Sample API Client."""
+"""PodPoint Basic API Client."""
 import logging
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Union
 from datetime import datetime
 
 import aiohttp
-
-from podpointclient.schedule import Schedule
 
 from .endpoints import API_BASE_URL, CHARGE_SCHEDULES, PODS, UNITS, USERS, CHARGES
 from .helpers.auth import Auth
@@ -13,19 +11,23 @@ from .helpers.functions import auth_headers
 from .helpers.api_wrapper import APIWrapper
 from .factories import PodFactory, ScheduleFactory, ChargeFactory
 from .pod import Pod
+from .charge import Charge
+from .schedule import Schedule
 
 TIMEOUT = 10
 
 _LOGGER: logging.Logger = logging.getLogger(__package__)
 
 HEADERS = {"Content-type": "application/json; charset=UTF-8"}
+DEFAULT_INCLUDES = ["statuses", "price", "model",
+                    "unit_connectors", "charge_schedules"]
 
 
 class PodPointClient:
     """API Client for communicating with Pod Point."""
 
     def __init__(
-        self,   
+        self,
         username: str,
         password: str,
         session: aiohttp.ClientSession = aiohttp.ClientSession(),
@@ -46,35 +48,69 @@ class PodPointClient:
         self.api_wrapper = APIWrapper(session=self._session)
         self.include_timestamp = include_timestamp
 
-    async def async_get_pods(self) -> List[Pod]:
-        """Get pods from the API."""
+    async def async_credentials_verified(self) -> bool:
+        """Perform a minimum call to verify we have working credentials and can get one Pod"""
         await self.auth.async_update_access_token()
 
-        path = f"{USERS}/{self.auth.user_id}{PODS}"
-        url = f"{API_BASE_URL}{path}"
+        pods = await self.async_get_pods(perpage=1, page=1, includes=[])
+        return len(pods) > 0
 
-        includes = ["statuses", "price", "model", "unit_connectors", "charge_schedules"]
-        params = {"perpage": "all", "include": ",".join(includes)}
-        if self.include_timestamp:
-            params = self._add_timestamp_to_params(params)
+    async def async_get_all_pods(
+        self,
+        includes: Union[List[str], None] = None
+    ) -> List[Pod]:
+        """Get all pods from the API"""
+        perpage = 5
+        page = 1
+        pods: List[Pod] = []
 
-        headers = auth_headers(access_token=self.auth.access_token)
+        more_pods = True
+        while more_pods:
+            new_pods: List[Pod] = await self.async_get_pods(
+                perpage=perpage,
+                page=page,
+                includes=includes
+            )
+            # Should be replaced by reading "meta > pagination > page_count" but
+            # would require a larger refactor
+            if len(new_pods) < perpage:
+                more_pods = False
 
-        response = await self.api_wrapper.get(url=url, params=params, headers=headers)
+            pods.extend(new_pods)
+            page += 1
 
-        json = await response.json()
+        return pods
 
-        if self._http_debug:
-            _LOGGER.debug(json)
+    async def async_get_pods(
+        self,
+        perpage: Union[str, int] = 5,
+        page: Union[str, int] = 1,
+        includes: Union[List[str], None] = None
+    ) -> List[Pod]:
+        """Get pods from the API"""
+        await self.auth.async_update_access_token()
 
-        factory = PodFactory()
-        pods = factory.build_pods(pods_response=json)
+        if includes is None:
+            includes = DEFAULT_INCLUDES
+
+        params = {"perpage": perpage, "page": page,
+                  "include": ",".join(includes)}
+
+        response = await self.api_wrapper.get(
+            url=self._url_from_path(path=f"{USERS}/{self.auth.user_id}{PODS}"),
+            params=self._generate_complete_params(params=params),
+            headers=auth_headers(access_token=self.auth.access_token)
+        )
+
+        json = await self._handle_json_response(response=response)
+
+        pods = PodFactory().build_pods(pods_response=json)
 
         return pods
 
     async def async_get_pod(self, pod_id: int) -> Pod:
-        """Get specific pod from the API."""
-        pods = await self.async_get_pods()
+        """Get specific pod from the API"""
+        pods = await self.async_get_all_pods()
         return next((pod for pod in pods if pod.id == pod_id), None)
 
     async def async_set_schedule(self, enabled: bool, pod: Pod) -> bool:
@@ -89,17 +125,15 @@ class PodPointClient:
             enabled
         )
 
-        path = f"{UNITS}/{unit_id}{CHARGE_SCHEDULES}"
-        url = f"{API_BASE_URL}{path}"
-        params = None
-        if self.include_timestamp:
-            params = self._add_timestamp_to_params({})
+        response = await self.api_wrapper.put(
+            url=self._url_from_path(
+                path=f"{UNITS}/{unit_id}{CHARGE_SCHEDULES}"),
+            params=self._generate_complete_params(params=None),
+            headers=auth_headers(access_token=self.auth.access_token),
+            body=self._schedule_data(enabled=enabled)
+        )
 
-        headers = auth_headers(access_token=self.auth.access_token)
-        payload = self._schedule_data(enabled=enabled)
-
-        response = await self.api_wrapper.put(url=url, body=payload, headers=headers, params=params)
-
+        #  Quick exit if the response code is 201
         if response.status == 201:
             return True
 
@@ -111,39 +145,79 @@ class PodPointClient:
         )
         return False
 
-    async def async_get_charges(self, per_page: str = "5", page: str = "1"):
+    async def async_get_all_charges(
+        self
+    ) -> List[Charge]:
+        """Get all charges from the API"""
+        perpage = 5
+        page = 1
+        charges: List[Charge] = []
+
+        more_charges = True
+        while more_charges:
+            new_charges: List[Charge] = await self.async_get_charges(perpage=perpage, page=page)
+            # Should be replaced by reading "meta > pagination > page_count" but
+            # would require a larger refactor
+            if len(new_charges) < perpage:
+                more_charges = False
+
+            charges.extend(new_charges)
+            page += 1
+
+        return charges
+
+    async def async_get_charges(
+        self,
+        perpage: Union[str, int] = 5,
+        page: Union[str, int] = 1
+    ) -> List[Charge]:
         """Get charges from the API."""
         await self.auth.async_update_access_token()
 
-        path = f"{USERS}/{self.auth.user_id}{CHARGES}"
-        url = f"{API_BASE_URL}{path}"
-        params = {"perpage": per_page, "page": page}
-        if self.include_timestamp:
-            params = self._add_timestamp_to_params(params)
+        response = await self.api_wrapper.get(
+            url=self._url_from_path(
+                path=f"{USERS}/{self.auth.user_id}{CHARGES}"),
+            params=self._generate_complete_params(
+                params={"perpage": perpage, "page": page}),
+            headers=auth_headers(access_token=self.auth.access_token)
+        )
 
-        headers = auth_headers(access_token=self.auth.access_token)
+        json = await self._handle_json_response(response=response)
 
-        response = await self.api_wrapper.get(url=url, params=params, headers=headers)
-
-        json = await response.json()
-
-        if self._http_debug:
-            _LOGGER.debug(json)
-
-        factory = ChargeFactory()
-        charges = factory.build_charges(charge_response=json)
+        charges = ChargeFactory().build_charges(charge_response=json)
 
         return charges
 
     def _schedule_data(self, enabled: bool) -> Dict[str, Any]:
-        factory = ScheduleFactory()
-        schedules: List[Schedule] = factory.build_schedules(enabled=enabled)
+        """Generate a new schedule body with all the enable attributes set to the `enabled` value"""
+        schedules: List[Schedule] = ScheduleFactory(
+        ).build_schedules(enabled=enabled)
 
         d_list = list(map(lambda schedule: schedule.dict, schedules))
 
         return {"data": d_list}
 
-    def _add_timestamp_to_params(self, params: Dict[str, Any]) -> Dict[str, any]:
-        params["timestamp"] = datetime.now().timestamp()
+    def _url_from_path(self, path: str) -> str:
+        """Given a path, return a complete API URL"""
+        return f"{API_BASE_URL}{path}"
 
+    def _generate_complete_params(self, params: Union[None, Dict[str, Any]]) -> Dict[str, any]:
+        """Given a params object, add optional params if required"""
+        if not self.include_timestamp:
+            return params
+
+        if params is None:
+            params = {}
+
+        params["timestamp"] = datetime.now().timestamp()
         return params
+
+    async def _handle_json_response(self, response: aiohttp.ClientResponse) -> Dict[str, any]:
+        """Given a Coroutine (assuming a response from ApiWrapper), await calling
+        json() and if needed, debug log the response"""
+        json = await response.json()
+
+        if self._http_debug:
+            _LOGGER.debug(json)
+
+        return json

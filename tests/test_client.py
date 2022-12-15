@@ -1,13 +1,14 @@
 import imp
+
 from aioresponses import aioresponses
 import aiohttp
-import json
 from podpointclient.client import PodPointClient
 from typing import List
 from podpointclient.pod import Pod
 from podpointclient.charge import Charge
 import pytest
 from freezegun import freeze_time
+import json
 
 from podpointclient.endpoints import API_BASE_URL, AUTH, CHARGE_SCHEDULES, CHARGES, PODS, SESSIONS, UNITS, USERS
 
@@ -35,7 +36,7 @@ async def test_async_get_pods_response():
     with aioresponses() as m:
         m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
         m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
-        m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?include=statuses%252Cprice%252Cmodel%252Cunit_connectors%252Ccharge_schedules&perpage=all&timestamp=1640995200.0', payload=pods_response)
+        m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?include=statuses%252Cprice%252Cmodel%252Cunit_connectors%252Ccharge_schedules&perpage=5&page=1&timestamp=1640995200.0', payload=pods_response)
 
         async with aiohttp.ClientSession() as session:
             client = PodPointClient(username="1233", password="1234", session=session, include_timestamp=True)
@@ -67,12 +68,102 @@ async def test_async_get_pods_response_without_timestamp():
     with aioresponses() as m:
         m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
         m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
-        m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?include=statuses%252Cprice%252Cmodel%252Cunit_connectors%252Ccharge_schedules&perpage=all', payload=pods_response)
+        m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?include=statuses%252Cprice%252Cmodel%252Cunit_connectors%252Ccharge_schedules&perpage=5&page=1', payload=pods_response)
 
         async with aiohttp.ClientSession() as session:
             client = PodPointClient(username="1233", password="1234", session=session, include_timestamp=False)
             pods = await client.async_get_pods()
             assert 1 == len(pods)
+            assert list == type(pods)
+            assert Pod == type(pods[0])
+
+@pytest.mark.asyncio
+async def test_async_get_all_pods_response():
+    auth_response = {
+        "token_type": "Bearer",
+        "expires_in": 1234,
+        "access_token": "1234",
+        "refresh_token": "1234"
+    }
+    session_response = {
+        "sessions": {
+            "id": "1234",
+            "user_id": "1234"
+        }
+    }
+    pods_response = {
+        "pods": [
+            json.load(open('./tests/fixtures/complete_pod.json')),
+            json.load(open('./tests/fixtures/complete_pod.json')),
+            json.load(open('./tests/fixtures/complete_pod.json')),
+            json.load(open('./tests/fixtures/complete_pod.json')),
+            json.load(open('./tests/fixtures/complete_pod.json'))
+        ]
+    }
+    pods_response_short = {
+        "pods": [
+            json.load(open('./tests/fixtures/complete_pod.json')),
+            json.load(open('./tests/fixtures/complete_pod.json')),
+            json.load(open('./tests/fixtures/complete_pod.json'))
+        ]
+    }
+
+    with aioresponses() as m:
+        m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
+        m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
+        m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?include=statuses%252Cprice%252Cmodel%252Cunit_connectors%252Ccharge_schedules&perpage=5&page=1', payload=pods_response)
+        m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?include=statuses%252Cprice%252Cmodel%252Cunit_connectors%252Ccharge_schedules&perpage=5&page=2', payload=pods_response)
+        m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?include=statuses%252Cprice%252Cmodel%252Cunit_connectors%252Ccharge_schedules&perpage=5&page=3', payload=pods_response_short)
+
+        async with aiohttp.ClientSession() as session:
+            client = PodPointClient(username="1233", password="1234", session=session, include_timestamp=False)
+            pods = await client.async_get_all_pods()
+            assert 13 == len(pods)
+            assert list == type(pods)
+            assert Pod == type(pods[0])
+
+@pytest.mark.asyncio
+@freeze_time("Jan 1st, 2022")
+async def test_async_get_all_pods_response_with_includes_overridden_and_timestamp():
+    auth_response = {
+        "token_type": "Bearer",
+        "expires_in": 1234,
+        "access_token": "1234",
+        "refresh_token": "1234"
+    }
+    session_response = {
+        "sessions": {
+            "id": "1234",
+            "user_id": "1234"
+        }
+    }
+    pods_response = {
+        "pods": [
+            json.load(open('./tests/fixtures/complete_pod.json')),
+            json.load(open('./tests/fixtures/complete_pod.json')),
+            json.load(open('./tests/fixtures/complete_pod.json')),
+            json.load(open('./tests/fixtures/complete_pod.json')),
+            json.load(open('./tests/fixtures/complete_pod.json'))
+        ]
+    }
+    pods_response_short = {
+        "pods": [
+            json.load(open('./tests/fixtures/complete_pod.json')),
+            json.load(open('./tests/fixtures/complete_pod.json')),
+            json.load(open('./tests/fixtures/complete_pod.json'))
+        ]
+    }
+
+    with aioresponses() as m:
+        m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
+        m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
+        m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?include=foo%252Cbar&perpage=5&page=1&timestamp=1640995200.0', payload=pods_response)
+        m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?include=foo%252Cbar&perpage=5&page=2&timestamp=1640995200.0', payload=pods_response_short)
+
+        async with aiohttp.ClientSession() as session:
+            client = PodPointClient(username="1233", password="1234", session=session, include_timestamp=True)
+            pods = await client.async_get_all_pods(includes=["foo", "bar"])
+            assert 8 == len(pods)
             assert list == type(pods)
             assert Pod == type(pods[0])
 
@@ -149,20 +240,20 @@ async def test_async_get_charges_response():
             assert Charge == type(resp[0])
 
             # Test that a request for 10 will result in 10
-            resp: List[Charge] = await client.async_get_charges(per_page=10)
+            resp: List[Charge] = await client.async_get_charges(perpage=10)
             assert 10 == len(resp)
 
             # Test that a request for all will result in all
-            resp: List[Charge] = await client.async_get_charges(per_page="all")
+            resp: List[Charge] = await client.async_get_charges(perpage="all")
             assert 10 == len(resp)
 
             # Test that pages work as expected
-            resp: List[Charge] = await client.async_get_charges(per_page=5, page=2)
+            resp: List[Charge] = await client.async_get_charges(perpage=5, page=2)
             assert 5 == len(resp)
             assert 6 == resp[0].id
 
             # Test that requesting a page that is out of bounds returns an empty list
-            resp: List[Charge] = await client.async_get_charges(per_page=5, page=42)
+            resp: List[Charge] = await client.async_get_charges(perpage=5, page=42)
             assert 0 == len(resp)
 
 async def test__schedule_data():
