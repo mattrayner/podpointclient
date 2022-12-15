@@ -4,3 +4,4 @@ freezegun
 pytz==2022.1
 pytest-aiohttp
 pytest-asyncio
+pytest-cov
