@@ -1,5 +1,32 @@
 # Pod Point Client Changelog
 
+## v1.0.0
+
+* Add lightweight credential verification call - @mattrayner
+* Add support for pagination rather than just adding 'perpage=all' - @mattrayner
+* Updated README with new instructions - @mattrayner
+* Fixed GitHub Actions - @mattrayner
+  * Added code coverage artifacts, so you can download the cov report for a run
+* Refactored code to improve dryness - @mattrayner
+* Added additional testing dependencies - @mattrayner
+
+## v0.3.0
+
+* Add http_debug flag - @mattrayner
+* When enabled, complete response bodies will be sent to logger.debug
+* Restructured helpers and other classes so that they made more sense - @mattrayner
+* Completed a pylon pass to standardize the code base - @mattrayner
+* Improved test coverage - @mattrayner
+
+## v0.2.2
+
+* Make timestamp=XXX optional, and off by default
+* Greatly improve test coverage
+
+## v0.2.1
+
+* Add charge duration seconds to Charge allowing for more granular tracking of charging time
+
 ## v0.2.0
 
 * Add `ChargeDuration` to `Charge` as `charge.charge_duration`
