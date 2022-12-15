@@ -29,3 +29,8 @@ jobs:
             -o console_output_style=count \
             -p no:sugar \
             tests
+       - name: Archive code coverage results
+        uses: actions/upload-artifact@v3
+        with:
+          name: code-coverage-report
+          path: htmlcov/*
