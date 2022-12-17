@@ -57,10 +57,10 @@ class PodPointClient:
 
     async def async_get_all_pods(
         self,
+        perpage: Union[str, int] = 5,
         includes: Union[List[str], None] = None
     ) -> List[Pod]:
         """Get all pods from the API"""
-        perpage = 5
         page = 1
         pods: List[Pod] = []
 
@@ -93,8 +93,9 @@ class PodPointClient:
         if includes is None:
             includes = DEFAULT_INCLUDES
 
-        params = {"perpage": perpage, "page": page,
-                  "include": ",".join(includes)}
+        params = {"perpage": perpage, "page": page}
+        if len(includes) > 0:
+            params["include"] = ",".join(includes)
 
         response = await self.api_wrapper.get(
             url=self._url_from_path(path=f"{USERS}/{self.auth.user_id}{PODS}"),
@@ -146,10 +147,10 @@ class PodPointClient:
         return False
 
     async def async_get_all_charges(
-        self
+        self,
+        perpage: Union[str, int] = 50
     ) -> List[Charge]:
         """Get all charges from the API"""
-        perpage = 5
         page = 1
         charges: List[Charge] = []
 
