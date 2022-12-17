@@ -14,6 +14,93 @@ from podpointclient.endpoints import API_BASE_URL, AUTH, CHARGE_SCHEDULES, CHARG
 
 @pytest.mark.asyncio
 @freeze_time("Jan 1st, 2022")
+async def test_async_credentials_verified():
+    auth_response = {
+        "token_type": "Bearer",
+        "expires_in": 1234,
+        "access_token": "1234",
+        "refresh_token": "1234"
+    }
+    session_response = {
+        "sessions": {
+            "id": "1234",
+            "user_id": "1234"
+        }
+    }
+    pods_response = {
+        "pods": [
+            json.load(open('./tests/fixtures/complete_pod.json'))
+        ]
+    }
+    
+    with aioresponses() as m:
+        m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
+        m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
+        m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?include=&perpage=1&page=1&timestamp=1640995200.0', payload=pods_response)
+
+        async with aiohttp.ClientSession() as session:
+            client = PodPointClient(username="1233", password="1234", session=session, include_timestamp=True)
+            pods = await client.async_credentials_verified()
+            assert pods is True
+
+@pytest.mark.asyncio
+@freeze_time("Jan 1st, 2022")
+async def test_async_credentials_verified_returns_false_if_no_pods():
+    auth_response = {
+        "token_type": "Bearer",
+        "expires_in": 1234,
+        "access_token": "1234",
+        "refresh_token": "1234"
+    }
+    session_response = {
+        "sessions": {
+            "id": "1234",
+            "user_id": "1234"
+        }
+    }
+    pods_response = {
+        "pods": []
+    }
+    
+    with aioresponses() as m:
+        m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
+        m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
+        m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?include=&perpage=1&page=1&timestamp=1640995200.0', payload=pods_response)
+
+        async with aiohttp.ClientSession() as session:
+            client = PodPointClient(username="1233", password="1234", session=session, include_timestamp=True)
+            pods = await client.async_credentials_verified()
+            assert pods is False
+
+@pytest.mark.asyncio
+@freeze_time("Jan 1st, 2022")
+async def test_async_credentials_verified_returns_false_if_body_unexpected():
+    auth_response = {
+        "token_type": "Bearer",
+        "expires_in": 1234,
+        "access_token": "1234",
+        "refresh_token": "1234"
+    }
+    session_response = {
+        "sessions": {
+            "id": "1234",
+            "user_id": "1234"
+        }
+    }
+    pods_response = { "foo": "bar" }
+    
+    with aioresponses() as m:
+        m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
+        m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
+        m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?include=&perpage=1&page=1&timestamp=1640995200.0', payload=pods_response)
+
+        async with aiohttp.ClientSession() as session:
+            client = PodPointClient(username="1233", password="1234", session=session, include_timestamp=True)
+            pods = await client.async_credentials_verified()
+            assert pods is False
+
+@pytest.mark.asyncio
+@freeze_time("Jan 1st, 2022")
 async def test_async_get_pods_response():
     auth_response = {
         "token_type": "Bearer",
@@ -163,6 +250,51 @@ async def test_async_get_all_pods_response_with_includes_overridden_and_timestam
         async with aiohttp.ClientSession() as session:
             client = PodPointClient(username="1233", password="1234", session=session, include_timestamp=True)
             pods = await client.async_get_all_pods(includes=["foo", "bar"])
+            assert 8 == len(pods)
+            assert list == type(pods)
+            assert Pod == type(pods[0])
+            
+@pytest.mark.asyncio
+@freeze_time("Jan 1st, 2022")
+async def test_async_get_all_pods_response_with_includes_empty_and_timestamp():
+    auth_response = {
+        "token_type": "Bearer",
+        "expires_in": 1234,
+        "access_token": "1234",
+        "refresh_token": "1234"
+    }
+    session_response = {
+        "sessions": {
+            "id": "1234",
+            "user_id": "1234"
+        }
+    }
+    pods_response = {
+        "pods": [
+            json.load(open('./tests/fixtures/complete_pod.json')),
+            json.load(open('./tests/fixtures/complete_pod.json')),
+            json.load(open('./tests/fixtures/complete_pod.json')),
+            json.load(open('./tests/fixtures/complete_pod.json')),
+            json.load(open('./tests/fixtures/complete_pod.json'))
+        ]
+    }
+    pods_response_short = {
+        "pods": [
+            json.load(open('./tests/fixtures/complete_pod.json')),
+            json.load(open('./tests/fixtures/complete_pod.json')),
+            json.load(open('./tests/fixtures/complete_pod.json'))
+        ]
+    }
+
+    with aioresponses() as m:
+        m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
+        m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
+        m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?perpage=5&page=1&timestamp=1640995200.0', payload=pods_response)
+        m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?perpage=5&page=2&timestamp=1640995200.0', payload=pods_response_short)
+
+        async with aiohttp.ClientSession() as session:
+            client = PodPointClient(username="1233", password="1234", session=session, include_timestamp=True)
+            pods = await client.async_get_all_pods(includes=[])
             assert 8 == len(pods)
             assert list == type(pods)
             assert Pod == type(pods[0])

@@ -9,6 +9,7 @@
   * Added code coverage artifacts, so you can download the cov report for a run
 * Refactored code to improve dryness - @mattrayner
 * Added additional testing dependencies - @mattrayner
+* Add CD pipeline, when a new tag/release is pushed, auto-publish to PyPi - @mattrayner
 
 ## v0.3.0
 

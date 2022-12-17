@@ -93,8 +93,9 @@ class PodPointClient:
         if includes is None:
             includes = DEFAULT_INCLUDES
 
-        params = {"perpage": perpage, "page": page,
-                  "include": ",".join(includes)}
+        params = {"perpage": perpage, "page": page}
+        if len(includes) > 0:
+            params["include"] = ",".join(includes)
 
         response = await self.api_wrapper.get(
             url=self._url_from_path(path=f"{USERS}/{self.auth.user_id}{PODS}"),
