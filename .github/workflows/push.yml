@@ -39,6 +39,9 @@ jobs:
         with:
           name: code-coverage-report
           path: htmlcov/*
+      - name: Build release package
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+        run: make package
       - name: Publish package
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
         uses: pypa/gh-action-pypi-publish@release/v1
