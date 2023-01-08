@@ -1,6 +1,6 @@
 """Factories used to create top level objects such as pods, sessions and charges"""
 from typing import Dict, Any, List
-from .pod import Pod
+from .pod import Pod, Firmware
 from .schedule import Schedule, ScheduleStatus
 from .charge import Charge
 
@@ -60,3 +60,19 @@ class ChargeFactory:
             charges.append(Charge(data=charge))
 
         return charges
+
+
+class FirmwareFactory:
+    """Factory  for creating Firmware objects"""
+    def build_firmwares(self, firmware_response: Dict[str, Any]) -> List[Firmware]:
+        """Build a list of firmware objects based off of a response from pod point"""
+        firmwares = []
+
+        firmware_data = firmware_response.get('data', None)
+        if firmware_data is None:
+            return firmwares
+
+        for firmware in firmware_data:
+            firmwares.append(Firmware(data=firmware))
+
+        return firmwares

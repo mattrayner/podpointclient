@@ -4,13 +4,13 @@ from aioresponses import aioresponses
 import aiohttp
 from podpointclient.client import PodPointClient
 from typing import List
-from podpointclient.pod import Pod
+from podpointclient.pod import Pod, Firmware
 from podpointclient.charge import Charge
 import pytest
 from freezegun import freeze_time
 import json
 
-from podpointclient.endpoints import API_BASE_URL, AUTH, CHARGE_SCHEDULES, CHARGES, PODS, SESSIONS, UNITS, USERS
+from podpointclient.endpoints import API_BASE_URL, AUTH, CHARGE_SCHEDULES, CHARGES, FIRMWARE, PODS, SESSIONS, UNITS, USERS
 
 @pytest.mark.asyncio
 @freeze_time("Jan 1st, 2022")
@@ -499,3 +499,41 @@ async def test__schedule_data():
             }
             assert client._schedule_data(True) == true_data
             assert client._schedule_data(False) == false_data
+
+@pytest.mark.asyncio
+@freeze_time("Jan 1st, 2022")
+async def test_async_get_firmware():
+    auth_response = {
+        "token_type": "Bearer",
+        "expires_in": 1234,
+        "access_token": "1234",
+        "refresh_token": "1234"
+    }
+    session_response = {
+        "sessions": {
+            "id": "1234",
+            "user_id": "1234"
+        }
+    }
+    pod_data = json.load(open('./tests/fixtures/complete_pod.json'))
+    firmware_response = json.load(open('./tests/fixtures/complete_firmware.json'))
+
+    with aioresponses() as m:
+        m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
+        m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
+        m.get(f'{API_BASE_URL}{UNITS}/198765{FIRMWARE}?timestamp=1640995200.0', payload=firmware_response)
+        m.get(f'{API_BASE_URL}{UNITS}/198765{FIRMWARE}', payload=firmware_response)
+
+        async with aiohttp.ClientSession() as session:
+            client = PodPointClient(username="1233", password="1234", session=session, include_timestamp=True)
+            resp = await client.async_get_firmware(pod=Pod(data=pod_data))
+            assert 1 == len(resp)
+            assert isinstance(resp[0], Firmware) is True
+
+            firmware = resp[0]
+            assert firmware.serial_number == '123456789'
+            assert firmware.version_info.manifest_id == 'A30P-3.1.22-00001'
+            assert firmware.update_status.is_update_available == False
+
+            assert firmware.firmware_version == 'A30P-3.1.22-00001'
+            assert firmware.update_available == False

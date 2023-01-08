@@ -1,7 +1,7 @@
 """Representation of a Pod from pod point"""
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Union
 from enum import auto
 import json
 from strenum import StrEnum, KebabCaseStrEnum
@@ -50,6 +50,90 @@ class Socket:
         return json.dumps(self.dict, ensure_ascii=False)
 
 
+@dataclass
+class FirmwareVersion:
+    """Representation of the Firmware Version object reported by PodPoint"""
+    manifest_id: str
+
+    @property
+    def dict(self):
+        """Dictionary conversion for FirmwareVersion"""
+        return { "manifest_id": self.manifest_id }
+
+    def to_json(self):
+        """JSON representation of a FirmwareVersion object"""
+        return json.dumps(self.dict, ensure_ascii=False)
+
+
+@dataclass
+class FirmwareStatus:
+    """Representation of the FirmwareStatus object reported by PodPoint"""
+    is_update_available: bool
+
+    @property
+    def dict(self):
+        """Dictionary conversion of FirmwareStatus"""
+        return { "is_update_available": self.is_update_available }
+
+    def to_json(self):
+        """JSON representation of a FirmwareStatus object"""
+        return json.dumps(self.dict, ensure_ascii=False)
+
+
+class Firmware:
+    """Representation of the pod's Firmware report"""
+    def __init__(self, data: Dict[str, Any]):
+        self.serial_number: str            = data.get('serial_number', None)
+        self.version_info: FirmwareVersion = None
+        self.update_status: FirmwareStatus = None
+
+        firmware_version_data = data.get('version_info', None)
+        if firmware_version_data:
+            self.version_info = FirmwareVersion(
+                manifest_id=firmware_version_data.get('manifest_id', None)
+            )
+
+        update_status_data = data.get('update_status', None)
+        if update_status_data:
+            self.update_status = FirmwareStatus(
+                is_update_available=update_status_data.get('is_update_available', None)
+            )
+
+    @property
+    def firmware_version(self) -> str:
+        if self.version_info is None:
+            return None
+
+        return self.version_info.manifest_id
+
+    @property
+    def update_available(self) -> bool:
+        if self.update_status is None:
+            return None
+
+        return self.update_status.is_update_available
+
+    @property
+    def dict(self) -> Dict[str, Any]:
+        dictionary = {
+            "serial_number": self.serial_number,
+            "version_info": None,
+            "update_status": None
+        }
+
+        if self.version_info:
+            dictionary["version_info"] = self.version_info.dict
+            
+        if self.update_status:
+            dictionary["update_status"] = self.update_status.dict
+
+        return dictionary
+
+    def to_json(self):
+        """JSON representation of a Firmware object"""
+        return json.dumps(self.dict, ensure_ascii=False)
+
+
 class Pod:
     """Representation of a Pod from pod point"""
     def __init__(self, data: Dict[str, Any]):
@@ -74,6 +158,8 @@ class Pod:
         self.total_charge_seconds: int = 0
         self.current_kwh: float        = 0.0
         self.total_cost: int           = 0
+
+        self.firmware: Union(Firmware, None) = None
 
         model_data = data.get('model', {})
         self.model = self.Model(
@@ -156,6 +242,7 @@ class Pod:
                 )
             )
 
+
     @property
     def dict(self) -> Dict[str, Any]:
         """Dictionary representaion of a Pod"""
@@ -184,7 +271,8 @@ class Pod:
             "total_kwh": self.total_kwh,
             "total_charge_seconds": self.total_charge_seconds,
             "current_kwh": self.current_kwh,
-            "total_cost": self.total_cost
+            "total_cost": self.total_cost,
+            "firmware": None
         }
 
         for status in self.statuses:
@@ -197,6 +285,9 @@ class Pod:
 
         for charge_schedule in self.charge_schedules:
             dictionary['charge_schedules'].append(charge_schedule.dict)
+
+        if isinstance(self.firmware, Firmware):
+            dictionary['firmware'] = self.firmware.dict
 
         return dictionary
 

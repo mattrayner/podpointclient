@@ -5,12 +5,12 @@ from datetime import datetime
 
 import aiohttp
 
-from .endpoints import API_BASE_URL, CHARGE_SCHEDULES, PODS, UNITS, USERS, CHARGES
+from .endpoints import API_BASE_URL, CHARGE_SCHEDULES, PODS, UNITS, USERS, CHARGES, FIRMWARE
 from .helpers.auth import Auth
 from .helpers.functions import auth_headers
 from .helpers.api_wrapper import APIWrapper
-from .factories import PodFactory, ScheduleFactory, ChargeFactory
-from .pod import Pod
+from .factories import PodFactory, ScheduleFactory, ChargeFactory, FirmwareFactory
+from .pod import Pod, Firmware
 from .charge import Charge
 from .schedule import Schedule
 
@@ -188,6 +188,24 @@ class PodPointClient:
         charges = ChargeFactory().build_charges(charge_response=json)
 
         return charges
+
+    async def async_get_firmware(self, pod: Pod) -> List[Firmware]:
+        """Get firmware information for a given unit."""
+        await self.auth.async_update_access_token()
+        
+        response = await self.api_wrapper.get(
+            url=self._url_from_path(
+                path=f"{UNITS}/{pod.unit_id}{FIRMWARE}"),
+            params=self._generate_complete_params(params=None),
+            headers=auth_headers(access_token=self.auth.access_token)
+        )
+
+        json = await self._handle_json_response(response=response)
+
+        firmwares = FirmwareFactory().build_firmwares(firmware_response=json)
+
+        return firmwares
+
 
     def _schedule_data(self, enabled: bool) -> Dict[str, Any]:
         """Generate a new schedule body with all the enable attributes set to the `enabled` value"""

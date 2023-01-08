@@ -1,7 +1,7 @@
 import json
 import os
 
-from podpointclient.endpoints import API_BASE_URL, AUTH, CHARGE_SCHEDULES, PODS, SESSIONS, UNITS, USERS, CHARGES
+from podpointclient.endpoints import API_BASE_URL, AUTH, CHARGE_SCHEDULES, PODS, SESSIONS, UNITS, USERS, CHARGES, FIRMWARE
 
 class Mocks:
     def __init__(self, m = None) -> None:
@@ -13,6 +13,7 @@ class Mocks:
         pods_response = self.pods_response()
         pods_response_schedule_disabled = self.pods_response_schedule_disabled()
         charges_response = self.charges_response()
+        firmware_response = self.firmware_response()
 
         timestamp = ""
         and_timestamp = ""
@@ -29,6 +30,7 @@ class Mocks:
         self.m.put(f'{API_BASE_URL}{UNITS}/198765{CHARGE_SCHEDULES}{question_timestamp}', payload=pods_response, status=201)
         self.m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?perpage=5&page=1&include=statuses,price,model,unit_connectors,charge_schedules{and_timestamp}', payload=pods_response_schedule_disabled)
         self.m.get(f'{API_BASE_URL}{USERS}/1234{CHARGES}?perpage=1&page=1{and_timestamp}', payload=charges_response)
+        self.m.get(f'{API_BASE_URL}{UNITS}/198765{FIRMWARE}{question_timestamp}', payload=firmware_response)
 
     def auth_response(self):
         return self.__json_load_fixture('auth')
@@ -65,6 +67,9 @@ class Mocks:
     
     def charges_response(self):
         return self.__json_load_fixture('complete_charges')
+
+    def firmware_response(self):
+        return self.__json_load_fixture('complete_firmware')
 
     def __json_load_fixture(self, fixture_name: str):
         file_location = os.path.dirname(__file__)

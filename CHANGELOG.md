@@ -1,5 +1,10 @@
 # Pod Point Client Changelog
 
+## v1.1.0
+
+* Add `Firmware` to `Pod` - @mattrayner
+* Add `Client.async_get_firmware` call - @mattrayner
+
 ## v1.0.0
 
 * Add lightweight credential verification call - @mattrayner

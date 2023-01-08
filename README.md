@@ -29,12 +29,14 @@ Method | Description
 `async_set_schedule(enabled=False, pod=pod)` | *Updates a pod with a week of schedules that will enable or disable charging* - See setting charging schedules for more information on how this works.
 `async_get_all_charges()` | *Get all charges from a user's account* - Returns a list of `Charge` objects.
 `async_get_charges(perpage=5, page=2)` | *Get charges for a user* - Returns a list of `Charge` objects. `perpage` can be 'all', or a number. Can get additional pages with `page` attribute.
+`async_get_firmware(pod=_Pod_)` | *Get firmware information for a pod* - Returns a list of `Firmware` objects.
 
 ### Example
 
 The below walks through a common scenario: 
 
 1. Get all pods
+1. Get firmware and serial number data for one pod
 1. Updating the schedule of an individual pod
 1. Confirm that it worked
 
@@ -55,6 +57,12 @@ pods = await client.async_get_all_pods()
 
 # Select one to update schedules for
 pod = pods[0]
+
+# Get firmware information for the pod
+firmwares = await client.async_get_firmware(pod=pod)
+firmware = firmwares[0]
+print(firmware.serial_number)
+print(firmware.update_available)
 
 # Update schedule to disabled (allow charging at any time)
 await client.async_set_schedule(enabled=False, pod=pod)

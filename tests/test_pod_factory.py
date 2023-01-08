@@ -10,7 +10,7 @@ def test_pod_factory_single_pod_creation():
     pods = factory.build_pods(pods_response)
     
     assert 1 == len(pods)
-    assert Pod == type(pods[0])
+    assert isinstance(pods[0], Pod)
 
 def test_pod_factory_with_no_pods():
     factory = PodFactory()

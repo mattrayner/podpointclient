@@ -1,0 +1,13 @@
+{
+    "data": [
+        {
+            "serial_number": "123456789",
+            "version_info": {
+                "manifest_id": "A30P-3.1.22-00001"
+            },
+            "update_status": {
+                "is_update_available": false
+            }
+        }
+    ]
+}

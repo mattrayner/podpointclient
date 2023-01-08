@@ -2,7 +2,7 @@ from podpointclient.client import PodPointClient
 import aiohttp
 from aioresponses import aioresponses
 
-from podpointclient.pod import Pod
+from podpointclient.pod import Pod, Firmware
 from helpers import Mocks
 
 from freezegun import freeze_time
@@ -28,7 +28,16 @@ async def test_readme():
             
             # Select one to update schedules for
             pod = pods[0]
-            assert type(pod) is Pod
+            assert isinstance(pod, Pod) is True
+
+            # Get firmware information for the pod
+            firmwares = await client.async_get_firmware(pod=pod)
+            firmware = firmwares[0]
+            assert isinstance(firmware, Firmware)
+            print(firmware.serial_number)
+            assert firmware.serial_number == '123456789'
+            print(firmware.update_available)
+            assert firmware.update_available is False
 
             # Update schedule to disabled (allow charging at any time)
             success = await client.async_set_schedule(enabled=False, pod=pod)
