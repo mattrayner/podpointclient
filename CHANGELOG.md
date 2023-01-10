@@ -1,6 +1,7 @@
 # Pod Point Client Changelog
 
-## v1.1.0
+
+## v1.1.0
 
 * Add `Firmware` to `Pod` - @mattrayner
 * Add `Client.async_get_firmware` call - @mattrayner
