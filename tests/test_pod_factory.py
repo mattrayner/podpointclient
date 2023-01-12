@@ -17,3 +17,7 @@ def test_pod_factory_with_no_pods():
     pods = factory.build_pods({})
 
     assert pods == []
+
+def test_pod_factory_with_none_passed():
+    factory = PodFactory()
+    assert factory.build_pods(None) == []

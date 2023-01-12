@@ -17,3 +17,7 @@ def test_firmware_factory_with_no_firmwares():
     firmwares = factory.build_firmwares({})
 
     assert firmwares == []
+
+def test_firmware_factory_with_none_passed():
+    factory = FirmwareFactory()
+    assert factory.build_firmwares(None) == []

@@ -1,6 +1,11 @@
 # Pod Point Client Changelog
 
 
+## v1.2.0
+
+* Add `User` - @mattrayner
+* Add `Client.async_get_user_info` - @mattrayner
+
 ## v1.1.0
 
 * Add `Firmware` to `Pod` - @mattrayner

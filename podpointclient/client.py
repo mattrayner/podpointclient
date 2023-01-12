@@ -5,23 +5,24 @@ from datetime import datetime
 
 import aiohttp
 
-from .endpoints import API_BASE_URL, CHARGE_SCHEDULES, PODS, UNITS, USERS, CHARGES, FIRMWARE
+from .endpoints import API_BASE_URL, CHARGE_SCHEDULES, PODS, UNITS, USERS, CHARGES, FIRMWARE, AUTH
 from .helpers.auth import Auth
 from .helpers.functions import auth_headers
 from .helpers.api_wrapper import APIWrapper
-from .factories import PodFactory, ScheduleFactory, ChargeFactory, FirmwareFactory
+from .factories import PodFactory, ScheduleFactory, ChargeFactory, FirmwareFactory, UserFactory
 from .pod import Pod, Firmware
 from .charge import Charge
 from .schedule import Schedule
+from .user import User
 
 TIMEOUT = 10
 
 _LOGGER: logging.Logger = logging.getLogger(__package__)
 
 HEADERS = {"Content-type": "application/json; charset=UTF-8"}
-DEFAULT_INCLUDES = ["statuses", "price", "model",
+DEFAULT_POD_INCLUDES = ["statuses", "price", "model",
                     "unit_connectors", "charge_schedules"]
-
+DEFAULT_USER_INCLUDES = ["account", "vehicle", "vehicle.make", "unit.pod.unit_connectors", "unit.pod.statuses", "unit.pod.model", "unit.pod.charge_schedules"]
 
 class PodPointClient:
     """API Client for communicating with Pod Point."""
@@ -91,7 +92,7 @@ class PodPointClient:
         await self.auth.async_update_access_token()
 
         if includes is None:
-            includes = DEFAULT_INCLUDES
+            includes = DEFAULT_POD_INCLUDES
 
         params = {"perpage": perpage, "page": page}
         if len(includes) > 0:
@@ -206,6 +207,28 @@ class PodPointClient:
 
         return firmwares
 
+    async def async_get_user(self, includes: Union[List[str], None] = None) -> User:
+        """Get user from the API"""
+        await self.auth.async_update_access_token()
+
+        if includes is None:
+            includes = DEFAULT_USER_INCLUDES
+
+        params = {}
+        if len(includes) > 0:
+            params["include"] = ",".join(includes)
+
+        response = await self.api_wrapper.get(
+            url=self._url_from_path(path=f"{AUTH}"),
+            params=self._generate_complete_params(params=params),
+            headers=auth_headers(access_token=self.auth.access_token)
+        )
+
+        json = await self._handle_json_response(response=response)
+
+        user = UserFactory().build_user(user_response=json)
+
+        return user
 
     def _schedule_data(self, enabled: bool) -> Dict[str, Any]:
         """Generate a new schedule body with all the enable attributes set to the `enabled` value"""

@@ -22,6 +22,11 @@ async def test_readme():
             print(verified)
             assert verified is True
 
+            # Get user information
+            user = await client.async_get_user()
+            print(f"Account balance {user.account.balance}p")
+            assert user.account.balance == 173
+
             # Get all pods for a user
             pods = await client.async_get_all_pods()
             assert len(pods) == 1

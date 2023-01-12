@@ -58,25 +58,22 @@ class Auth():
             _LOGGER.debug('Updating access token')
             access_token_updated: bool = await self.__update_access_token()
 
-            if access_token_updated:
-                _LOGGER.debug(
-                    "Updated access token. New expiration: %s",
-                    self.access_token_expiry
-                )
+            _LOGGER.debug(
+                "Updated access token. New expiration: %s",
+                self.access_token_expiry
+            )
 
-                self._session = Session(
-                    email=self.email,
-                    password=self.password,
-                    access_token=self.access_token,
-                    session=self._session,
-                    http_debug=self._http_debug
-                )
-                session_created = await self._session.create()
+            self._session = Session(
+                email=self.email,
+                password=self.password,
+                access_token=self.access_token,
+                session=self._session,
+                http_debug=self._http_debug
+            )
+            session_created = await self._session.create()
 
-                if session_created is False:
-                    _LOGGER.error("Error creating session")
-            else:
-                _LOGGER.error("Error updating access token")
+            if session_created is False:
+                _LOGGER.error("Error creating session")
 
             return access_token_updated and session_created
         except AuthError as exception:

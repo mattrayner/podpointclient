@@ -1,6 +1,7 @@
 """Factories used to create top level objects such as pods, sessions and charges"""
 from typing import Dict, Any, List
 from .pod import Pod, Firmware
+from .user import User
 from .schedule import Schedule, ScheduleStatus
 from .charge import Charge
 
@@ -10,7 +11,7 @@ class PodFactory:
         """Build a number of pod objects based off of a response from pod point"""
         pods = []
 
-        pods_data = pods_response.get('pods', None)
+        pods_data = pods_response.get('pods', None)  if pods_response is not None else None
         if pods_data is None:
             return pods
 
@@ -52,7 +53,7 @@ class ChargeFactory:
         """Build a list of charge objects based off of a response from pod point"""
         charges = []
 
-        charge_data = charge_response.get('charges', None)
+        charge_data = charge_response.get('charges', None) if charge_response is not None else None
         if charge_data is None:
             return charges
 
@@ -68,7 +69,7 @@ class FirmwareFactory:
         """Build a list of firmware objects based off of a response from pod point"""
         firmwares = []
 
-        firmware_data = firmware_response.get('data', None)
+        firmware_data = firmware_response.get('data', None) if firmware_response is not None else None
         if firmware_data is None:
             return firmwares
 
@@ -76,3 +77,13 @@ class FirmwareFactory:
             firmwares.append(Firmware(data=firmware))
 
         return firmwares
+
+class UserFactory:
+    """Factory  for creating User objects"""
+    def build_user(self, user_response: Dict[str, Any]) -> User:
+        """Build a user object based off of a response from pod point"""
+        user_data = user_response.get('users', None) if user_response is not None else None
+        if user_data is None:
+            return None
+
+        return User(data=user_data)

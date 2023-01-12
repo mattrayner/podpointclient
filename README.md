@@ -30,6 +30,7 @@ Method | Description
 `async_get_all_charges()` | *Get all charges from a user's account* - Returns a list of `Charge` objects.
 `async_get_charges(perpage=5, page=2)` | *Get charges for a user* - Returns a list of `Charge` objects. `perpage` can be 'all', or a number. Can get additional pages with `page` attribute.
 `async_get_firmware(pod=_Pod_)` | *Get firmware information for a pod* - Returns a list of `Firmware` objects.
+`async_get_user(includes=[])` | *Get current user account information* - Returns a `User` object including account balance, units and vehicles. `includes` is a list of additional information pulled for a User. Pass an empty list to `includes` for minimal information or `None` for full data (defaults to `None`)
 
 ### Example
 
@@ -51,6 +52,10 @@ client = PodPointClient(username="test@example.com", password="passw0rd!1")
 # Verify credentials work
 verified = await client.async_credentials_verified()
 print(verified)
+
+# Get user information
+user = await client.async_get_user()
+print(f"Account balance {user.account.balance}p")
 
 # Get all pods for a user
 pods = await client.async_get_all_pods()

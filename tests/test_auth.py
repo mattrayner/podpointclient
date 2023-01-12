@@ -90,6 +90,62 @@ async def test_update_access_token_when_not_set(aiohttp_client):
             assert auth.access_token_expiry > datetime.now()
 
 @pytest.mark.asyncio
+async def test_auth_with_session_error(aiohttp_client):
+    auth_response = {
+        "token_type": "Bearer",
+        "expires_in": 1234,
+        "access_token": "1234",
+        "refresh_token": "1234"
+    }
+    session_response = {
+        "foo": {
+            "id": "1234",
+            "user_id": "1234"
+        }
+    }
+
+    with aioresponses() as m:
+        m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
+        m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
+
+        async with aiohttp.ClientSession() as session:
+            auth = subject(session)
+
+            result = await auth.async_update_access_token()
+            print(result)
+            print(auth)
+
+            assert result is False
+
+@pytest.mark.asyncio
+async def test_auth_with_auth_error(aiohttp_client):
+    auth_response = {
+        "token_type": "Bearer",
+        "expires_in": 1234,
+        "access_token": "1234",
+        "refresh_token": "1234"
+    }
+    session_response = {
+        "session": {
+            "id": "1234",
+            "user_id": "1234"
+        }
+    }
+
+    with aioresponses() as m:
+        m.post(f'{API_BASE_URL}{AUTH}', status=201, payload=auth_response)
+
+        async with aiohttp.ClientSession() as session:
+            auth = subject(session)
+
+            with pytest.raises(AuthError) as e_info:
+                result = await auth.async_update_access_token()
+                print(result)
+                print(auth)
+
+                assert result is False
+
+@pytest.mark.asyncio
 async def test_update_access_token_when_not_set(aiohttp_client):
     auth_response = {
         "token_type": "Bearer",

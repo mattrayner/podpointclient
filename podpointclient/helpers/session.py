@@ -45,7 +45,7 @@ class Session:
             if self._http_debug:
                 _LOGGER.debug(json)
 
-            if json['sessions']:
+            if json.get('sessions', None):
                 self.user_id = json['sessions']['user_id']
                 self.session_id = json['sessions']['id']
                 return_value = True
