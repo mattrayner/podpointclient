@@ -132,7 +132,7 @@ class PodPointClient:
                 path=f"{UNITS}/{unit_id}{CHARGE_SCHEDULES}"),
             params=self._generate_complete_params(params=None),
             headers=auth_headers(access_token=self.auth.access_token),
-            body=self._schedule_data(enabled=enabled)
+            body=self._schedule_data(enabled=enabled, pod=pod)
         )
 
         #  Quick exit if the response code is 201
@@ -230,10 +230,16 @@ class PodPointClient:
 
         return user
 
-    def _schedule_data(self, enabled: bool) -> Dict[str, Any]:
+    def _schedule_data(self, enabled: bool, pod: Pod = None) -> Dict[str, Any]:
         """Generate a new schedule body with all the enable attributes set to the `enabled` value"""
+        if pod and pod.charge_schedules:
+            start_time = pod.charge_schedules[0].start_time
+            end_time = pod.charge_schedules[0].end_time
+        else:
+            start_time = "00:00:00"
+            end_time = "00:00:01"
         schedules: List[Schedule] = ScheduleFactory(
-        ).build_schedules(enabled=enabled)
+        ).build_schedules(enabled=enabled, start_time=start_time, end_time=end_time)
 
         d_list = list(map(lambda schedule: schedule.dict, schedules))
 
