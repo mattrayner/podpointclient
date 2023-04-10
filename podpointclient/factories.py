@@ -25,8 +25,8 @@ class ScheduleFactory:
     def build_schedules(
         self,
         enabled: bool,
-        start_time: str = "00:00:00",
-        end_time: str = "00:00:01"
+        start_time: str,
+        end_time: str
     ) -> List[Schedule]:
         """Build a number of schedule objects based off of a response from pod point"""
         schedules = []
