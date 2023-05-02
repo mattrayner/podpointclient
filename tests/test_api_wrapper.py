@@ -41,11 +41,11 @@ async def test_put(aiohttp_client):
 @pytest.mark.asyncio
 async def test_delete(aiohttp_client):
   with aioresponses() as m:
-    m.put('https://google.com/api/v1/test?foo=bar', status=204, body="OK")
+    m.delete('https://google.com/api/v1/test?foo=bar', status=204, body="OK")
 
     async with aiohttp.ClientSession() as session:
       wrapper = APIWrapper(session)
-      async with await wrapper.delete("https://google.com/api/v1/test", body={}, headers={}, params={"foo": "bar"}) as result:
+      async with await wrapper.delete("https://google.com/api/v1/test", headers={}, params={"foo": "bar"}) as result:
         assert 204 == result.status
         assert "OK" == await result.text()
 
