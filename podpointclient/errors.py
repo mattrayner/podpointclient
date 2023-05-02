@@ -19,3 +19,8 @@ class ApiConnectionError(APIError):
     """An error relating to connecting to pod point"""
     def __init__(self, message):
         super().__init__(f'Connection Error: {message}')
+
+class ChargeOverrideValidationError(Exception):
+    """An error relating to connecting to pod point"""
+    def __init__(self):
+        super().__init__(f'A validate error occured when processing charge override. Please ensure that an hour, minute or second value is passed and that it is > 0.')

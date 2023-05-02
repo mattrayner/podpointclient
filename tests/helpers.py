@@ -27,12 +27,12 @@ class Mocks:
         self.m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
         self.m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
         self.m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?perpage=1&page=1{and_timestamp}', payload=pods_response)
-        self.m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?perpage=5&page=1&include=statuses,price,model,unit_connectors,charge_schedules{and_timestamp}', payload=pods_response)
+        self.m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?perpage=5&page=1&include=statuses,price,model,unit_connectors,charge_schedules,charge_override{and_timestamp}', payload=pods_response)
         self.m.put(f'{API_BASE_URL}{UNITS}/198765{CHARGE_SCHEDULES}{question_timestamp}', payload=pods_response, status=201)
-        self.m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?perpage=5&page=1&include=statuses,price,model,unit_connectors,charge_schedules{and_timestamp}', payload=pods_response_schedule_disabled)
+        self.m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?perpage=5&page=1&include=statuses,price,model,unit_connectors,charge_schedules,charge_override{and_timestamp}', payload=pods_response_schedule_disabled)
         self.m.get(f'{API_BASE_URL}{USERS}/1234{CHARGES}?perpage=1&page=1{and_timestamp}', payload=charges_response)
         self.m.get(f'{API_BASE_URL}{UNITS}/198765{FIRMWARE}{question_timestamp}', payload=firmware_response)
-        self.m.get(f'{API_BASE_URL}{AUTH}?include=account,vehicle,vehicle.make,unit.pod.unit_connectors,unit.pod.statuses,unit.pod.model,unit.pod.charge_schedules', payload=user_response)
+        self.m.get(f'{API_BASE_URL}{AUTH}?include=account,vehicle,vehicle.make,unit.pod.unit_connectors,unit.pod.statuses,unit.pod.model,unit.pod.charge_schedules,unit.pod.charge_override', payload=user_response)
 
     def auth_response(self):
         return self.__json_load_fixture('auth')

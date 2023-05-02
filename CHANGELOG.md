@@ -1,5 +1,18 @@
 # Pod Point Client Changelog
 
+## v1.3.0
+
+* Migrate to API v5 - @mattrayner
+* Add support for charge overrides:
+  * Add `ChargeMode` enum - @mattrayner
+  * Add `ChargeOverride` - @mattrayner
+  * Add `Client.async_get_charge_override` - @mattrayner
+  * Add `Client.async_set_charge_override` - @mattrayner
+  * Add `Client.async_set_charge_mode_manual` - @mattrayner
+  * Add `Client.async_set_charge_mode_smart` - @mattrayner
+  * Add `Pod.charge_override` - @mattrayner
+  * Add `Pod.charge_mode` - @mattrayner
+* Add api wrapper delete support
 
 ## v1.2.0
 

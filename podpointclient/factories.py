@@ -4,6 +4,7 @@ from .pod import Pod, Firmware
 from .user import User
 from .schedule import Schedule, ScheduleStatus
 from .charge import Charge
+from .charge_override import ChargeOverride
 
 class PodFactory:
     """Factory for creating Pod objects"""
@@ -62,6 +63,14 @@ class ChargeFactory:
 
         return charges
 
+class ChargeOverrideFactory:
+    """Factory  for creating Charge objects"""
+    def build_charge_override(self, charge_override_response: Dict[str, Any]) -> ChargeOverride:
+        """Build a list of charge objects based off of a response from pod point"""
+        if charge_override_response is None:
+            return None
+
+        return ChargeOverride(data=charge_override_response)
 
 class FirmwareFactory:
     """Factory  for creating Firmware objects"""

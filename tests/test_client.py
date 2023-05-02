@@ -6,12 +6,16 @@ from podpointclient.client import PodPointClient
 from typing import List
 from podpointclient.pod import Pod, Firmware
 from podpointclient.charge import Charge
+from podpointclient.charge_override import ChargeOverride
 from podpointclient.user import User
+from podpointclient.errors import ChargeOverrideValidationError
 import pytest
 from freezegun import freeze_time
 import json
+import pytz
+from datetime import timedelta
 
-from podpointclient.endpoints import API_BASE_URL, AUTH, CHARGE_SCHEDULES, CHARGES, FIRMWARE, PODS, SESSIONS, UNITS, USERS
+from podpointclient.endpoints import API_BASE_URL, AUTH, CHARGE_SCHEDULES, CHARGES, FIRMWARE, PODS, SESSIONS, UNITS, USERS, CHARGE_OVERRIDE
 
 @pytest.mark.asyncio
 @freeze_time("Jan 1st, 2022")
@@ -124,7 +128,7 @@ async def test_async_get_pods_response():
     with aioresponses() as m:
         m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
         m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
-        m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?include=statuses%252Cprice%252Cmodel%252Cunit_connectors%252Ccharge_schedules&perpage=5&page=1&timestamp=1640995200.0', payload=pods_response)
+        m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?include=statuses%252Cprice%252Cmodel%252Cunit_connectors%252Ccharge_schedules%252Ccharge_override&perpage=5&page=1&timestamp=1640995200.0', payload=pods_response)
 
         async with aiohttp.ClientSession() as session:
             client = PodPointClient(username="1233", password="1234", session=session, include_timestamp=True)
@@ -156,7 +160,7 @@ async def test_async_get_pods_response_without_timestamp():
     with aioresponses() as m:
         m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
         m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
-        m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?include=statuses%252Cprice%252Cmodel%252Cunit_connectors%252Ccharge_schedules&perpage=5&page=1', payload=pods_response)
+        m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?include=statuses%252Cprice%252Cmodel%252Cunit_connectors%252Ccharge_schedules%252Ccharge_override&perpage=5&page=1', payload=pods_response)
 
         async with aiohttp.ClientSession() as session:
             client = PodPointClient(username="1233", password="1234", session=session, include_timestamp=False)
@@ -199,9 +203,9 @@ async def test_async_get_all_pods_response():
     with aioresponses() as m:
         m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
         m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
-        m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?include=statuses%252Cprice%252Cmodel%252Cunit_connectors%252Ccharge_schedules&perpage=5&page=1', payload=pods_response)
-        m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?include=statuses%252Cprice%252Cmodel%252Cunit_connectors%252Ccharge_schedules&perpage=5&page=2', payload=pods_response)
-        m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?include=statuses%252Cprice%252Cmodel%252Cunit_connectors%252Ccharge_schedules&perpage=5&page=3', payload=pods_response_short)
+        m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?include=statuses%252Cprice%252Cmodel%252Cunit_connectors%252Ccharge_schedules%252Ccharge_override&perpage=5&page=1', payload=pods_response)
+        m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?include=statuses%252Cprice%252Cmodel%252Cunit_connectors%252Ccharge_schedules%252Ccharge_override&perpage=5&page=2', payload=pods_response)
+        m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?include=statuses%252Cprice%252Cmodel%252Cunit_connectors%252Ccharge_schedules%252Ccharge_override&perpage=5&page=3', payload=pods_response_short)
 
         async with aiohttp.ClientSession() as session:
             client = PodPointClient(username="1233", password="1234", session=session, include_timestamp=False)
@@ -326,7 +330,7 @@ async def test_async_set_schedules_response():
     with aioresponses() as m:
         m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
         m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
-        m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?include=statuses%252Cprice%252Cmodel%252Cunit_connectors%252Ccharge_schedules&perpage=all&timestamp=1640995200.0', payload=pods_response)
+        m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?include=statuses%252Cprice%252Cmodel%252Cunit_connectors%252Ccharge_schedules%252Ccharge_override&perpage=all&timestamp=1640995200.0', payload=pods_response)
         m.put(f'{API_BASE_URL}{UNITS}/198765{CHARGE_SCHEDULES}?timestamp=1640995200.0', status=201, payload=schedules_response)
         m.put(f'{API_BASE_URL}{UNITS}/198765{CHARGE_SCHEDULES}?timestamp=1640995200.0', status=200, payload=schedules_response)
 
@@ -562,8 +566,8 @@ async def test_async_get_user():
     with aioresponses() as m:
         m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
         m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
-        m.get(f'{API_BASE_URL}{AUTH}?include=account,vehicle,vehicle.make,unit.pod.unit_connectors,unit.pod.statuses,unit.pod.model,unit.pod.charge_schedules&timestamp=1640995200.0', payload=user_data)
-        m.get(f'{API_BASE_URL}{AUTH}?include=account,vehicle,vehicle.make,unit.pod.unit_connectors,unit.pod.statuses,unit.pod.model,unit.pod.charge_schedules', payload=user_data)
+        m.get(f'{API_BASE_URL}{AUTH}?include=account,vehicle,vehicle.make,unit.pod.unit_connectors,unit.pod.statuses,unit.pod.model,unit.pod.charge_schedules,unit.pod.charge_override&timestamp=1640995200.0', payload=user_data)
+        m.get(f'{API_BASE_URL}{AUTH}?include=account,vehicle,vehicle.make,unit.pod.unit_connectors,unit.pod.statuses,unit.pod.model,unit.pod.charge_schedules,unit.pod.charge_override', payload=user_data)
         m.get(f'{API_BASE_URL}{AUTH}?include=account', payload=user_data)
 
         async with aiohttp.ClientSession() as session:
@@ -599,7 +603,7 @@ async def test_async_set_schedules_response():
     with aioresponses() as m:
         m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
         m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
-        m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?include=statuses%252Cprice%252Cmodel%252Cunit_connectors%252Ccharge_schedules&perpage=all&timestamp=1640995200.0', payload=pods_response)
+        m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?include=statuses%252Cprice%252Cmodel%252Cunit_connectors%252Ccharge_schedules%252Ccharge_override&perpage=all&timestamp=1640995200.0', payload=pods_response)
         m.put(f'{API_BASE_URL}{UNITS}/198765{CHARGE_SCHEDULES}?timestamp=1640995200.0', status=201, payload=schedules_response)
         m.put(f'{API_BASE_URL}{UNITS}/198765{CHARGE_SCHEDULES}?timestamp=1640995200.0', status=200, payload=schedules_response)
 
@@ -642,3 +646,279 @@ async def test_async_get_all_charges_response():
             resp: List[Charge] = await client.async_get_all_charges()
             assert 55 == len(resp)
             assert Charge == type(resp[0])
+
+@pytest.mark.asyncio
+@freeze_time("Jan 1st, 2022")
+async def test_async_get_charge_override_with_an_empty_response_meaning_smart_mode():
+    auth_response = {
+        "token_type": "Bearer",
+        "expires_in": 1234,
+        "access_token": "1234",
+        "refresh_token": "1234"
+    }
+    session_response = {
+        "sessions": {
+            "id": "1234",
+            "user_id": "1234"
+        }
+    }
+
+    with aioresponses() as m:
+        m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
+        m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
+        m.get(f'{API_BASE_URL}{UNITS}/1234{CHARGE_OVERRIDE}?timestamp=1640995200.0', body="", status=204)
+
+        async with aiohttp.ClientSession() as session:
+            client = PodPointClient(username="1233", password="1234", session=session, include_timestamp=True)
+            override = await client.async_get_charge_override(pod=Pod(data={"unit_id": 1234}))
+            assert override is None
+
+@pytest.mark.asyncio
+@freeze_time("Jan 1st, 2022")
+async def test_async_get_charge_override_with_a_manual_mode_response():
+    auth_response = {
+        "token_type": "Bearer",
+        "expires_in": 1234,
+        "access_token": "1234",
+        "refresh_token": "1234"
+    }
+    session_response = {
+        "sessions": {
+            "id": "1234",
+            "user_id": "1234"
+        }
+    }
+    override_response = {
+        "ppid": "PSL-123456",
+        "requested_at": "2021-12-31T16:22:34.000Z",
+        "received_at": "2021-12-31T16:22:43.000Z",
+        "ends_at": None
+    }
+
+    with aioresponses() as m:
+        m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
+        m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
+        m.get(f'{API_BASE_URL}{UNITS}/1234{CHARGE_OVERRIDE}?timestamp=1640995200.0', payload=override_response)
+
+        async with aiohttp.ClientSession() as session:
+            client = PodPointClient(username="1233", password="1234", session=session, include_timestamp=True)
+            override = await client.async_get_charge_override(pod=Pod(data={"unit_id": 1234}))
+            assert override is not None
+            assert ChargeOverride == type(override)
+            assert override.active is False
+            assert override.remaining_time is None
+
+@pytest.mark.asyncio
+@freeze_time("Jan 1st, 2022")
+async def test_async_get_charge_override_with_a_charge_override_time_response():
+    auth_response = {
+        "token_type": "Bearer",
+        "expires_in": 1234,
+        "access_token": "1234",
+        "refresh_token": "1234"
+    }
+    session_response = {
+        "sessions": {
+            "id": "1234",
+            "user_id": "1234"
+        }
+    }
+    override_response = {
+        "ppid": "PSL-123456",
+        "requested_at": "2021-12-31T16:22:34.000Z",
+        "received_at": "2021-12-31T16:22:43.000Z",
+        "ends_at": "2022-01-01T03:00:00.000Z"
+    }
+
+    with aioresponses() as m:
+        m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
+        m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
+        m.get(f'{API_BASE_URL}{UNITS}/1234{CHARGE_OVERRIDE}?timestamp=1640995200.0', payload=override_response)
+
+        async with aiohttp.ClientSession() as session:
+            client = PodPointClient(username="1233", password="1234", session=session, include_timestamp=True)
+            override = await client.async_get_charge_override(pod=Pod(data={"unit_id": 1234}))
+            assert override is not None
+            assert ChargeOverride == type(override)
+            assert override.active is True
+            assert override.remaining_time == timedelta(hours=3)
+
+@pytest.mark.asyncio
+@freeze_time("Jan 1st, 2022")
+async def test_async_set_charge_override_with_a_time_set():
+    auth_response = {
+        "token_type": "Bearer",
+        "expires_in": 1234,
+        "access_token": "1234",
+        "refresh_token": "1234"
+    }
+    session_response = {
+        "sessions": {
+            "id": "1234",
+            "user_id": "1234"
+        }
+    }
+    override_response = {
+        "ppid": "PSL-123456",
+        "requested_at": "2022-01-01T00:00:00.000Z",
+        "received_at": "2022-01-01T00:00:00.000Z",
+        "ends_at": "2022-01-01T03:02:01.000Z"
+    }
+
+    with aioresponses() as m:
+        m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
+        m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
+        m.put(f'{API_BASE_URL}{UNITS}/1234{CHARGE_OVERRIDE}?timestamp=1640995200.0', status=201, payload=override_response)
+
+        async with aiohttp.ClientSession() as session:
+            client = PodPointClient(username="1233", password="1234", session=session, include_timestamp=True)
+            override = await client.async_set_charge_override(pod=Pod(data={"unit_id": 1234}), hours=3, minutes=2, seconds=1)
+            assert override is not None
+            assert ChargeOverride == type(override)
+            assert override.active is True
+            assert override.remaining_time == timedelta(hours=3, minutes=2, seconds=1)
+
+@pytest.mark.asyncio
+@freeze_time("Jan 1st, 2022")
+async def test_async_set_charge_override_with_an_invalid_time_set():
+    auth_response = {
+        "token_type": "Bearer",
+        "expires_in": 1234,
+        "access_token": "1234",
+        "refresh_token": "1234"
+    }
+    session_response = {
+        "sessions": {
+            "id": "1234",
+            "user_id": "1234"
+        }
+    }
+    override_response = {
+        "ppid": "PSL-123456",
+        "requested_at": "2022-01-01T00:00:00.000Z",
+        "received_at": "2022-01-01T00:00:00.000Z",
+        "ends_at": "2022-01-01T03:02:01.000Z"
+    }
+
+    with aioresponses() as m:
+        m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
+        m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
+        m.put(f'{API_BASE_URL}{UNITS}/1234{CHARGE_OVERRIDE}?timestamp=1640995200.0', status=201, payload=override_response)
+
+        async with aiohttp.ClientSession() as session:
+            client = PodPointClient(username="1233", password="1234", session=session, include_timestamp=True)
+
+            with pytest.raises(ChargeOverrideValidationError):
+                await client.async_set_charge_override(pod=Pod(data={"unit_id": 1234}), hours=-3, minutes=0, seconds="a")
+            
+@pytest.mark.asyncio
+@freeze_time("Jan 1st, 2022")
+async def test_async_set_charge_mode_manual_with_expected_response():
+    auth_response = {
+        "token_type": "Bearer",
+        "expires_in": 1234,
+        "access_token": "1234",
+        "refresh_token": "1234"
+    }
+    session_response = {
+        "sessions": {
+            "id": "1234",
+            "user_id": "1234"
+        }
+    }
+    override_response = {
+        "ppid": "PSL-123456",
+        "requested_at": "2022-01-01T00:00:00.000Z",
+        "received_at": "2022-01-01T00:00:00.000Z",
+        "ends_at": None
+    }
+
+    with aioresponses() as m:
+        m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
+        m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
+        m.put(f'{API_BASE_URL}{UNITS}/1234{CHARGE_OVERRIDE}?timestamp=1640995200.0', status=201, payload=override_response)
+
+        async with aiohttp.ClientSession() as session:
+            client = PodPointClient(username="1233", password="1234", session=session, include_timestamp=True)
+            override = await client.async_set_charge_mode_manual(pod=Pod(data={"ppid": "PSL-123456", "unit_id": 1234}))
+            assert override == True
+
+@pytest.mark.asyncio
+@freeze_time("Jan 1st, 2022")
+async def test_async_set_charge_mode_manual_with_unexpected_response():
+    auth_response = {
+        "token_type": "Bearer",
+        "expires_in": 1234,
+        "access_token": "1234",
+        "refresh_token": "1234"
+    }
+    session_response = {
+        "sessions": {
+            "id": "1234",
+            "user_id": "1234"
+        }
+    }
+    override_response = {}
+
+    with aioresponses() as m:
+        m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
+        m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
+        m.put(f'{API_BASE_URL}{UNITS}/1234{CHARGE_OVERRIDE}?timestamp=1640995200.0', status=201, payload=override_response)
+
+        async with aiohttp.ClientSession() as session:
+            client = PodPointClient(username="1233", password="1234", session=session, include_timestamp=True)
+            override = await client.async_set_charge_mode_manual(pod=Pod(data={"ppid": "PSL-123456", "unit_id": 1234}))
+            assert override == False
+
+
+@pytest.mark.asyncio
+@freeze_time("Jan 1st, 2022")
+async def test_async_set_charge_mode_smart_with_204_response():
+    auth_response = {
+        "token_type": "Bearer",
+        "expires_in": 1234,
+        "access_token": "1234",
+        "refresh_token": "1234"
+    }
+    session_response = {
+        "sessions": {
+            "id": "1234",
+            "user_id": "1234"
+        }
+    }
+
+    with aioresponses() as m:
+        m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
+        m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
+        m.delete(f'{API_BASE_URL}{UNITS}/1234{CHARGE_OVERRIDE}?timestamp=1640995200.0', status=204)
+
+        async with aiohttp.ClientSession() as session:
+            client = PodPointClient(username="1233", password="1234", session=session, include_timestamp=True)
+            override = await client.async_set_charge_mode_smart(pod=Pod(data={"unit_id": 1234}))
+            assert override is True
+
+@pytest.mark.asyncio
+@freeze_time("Jan 1st, 2022")
+async def test_async_set_charge_mode_smart_with_unexpected_response():
+    auth_response = {
+        "token_type": "Bearer",
+        "expires_in": 1234,
+        "access_token": "1234",
+        "refresh_token": "1234"
+    }
+    session_response = {
+        "sessions": {
+            "id": "1234",
+            "user_id": "1234"
+        }
+    }
+
+    with aioresponses() as m:
+        m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
+        m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
+        m.delete(f'{API_BASE_URL}{UNITS}/1234{CHARGE_OVERRIDE}?timestamp=1640995200.0', status=200)
+
+        async with aiohttp.ClientSession() as session:
+            client = PodPointClient(username="1233", password="1234", session=session, include_timestamp=True)
+            override = await client.async_set_charge_mode_smart(pod=Pod(data={"unit_id": 1234}))
+            assert override is False

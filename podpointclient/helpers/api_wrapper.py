@@ -73,6 +73,22 @@ class APIWrapper:
             exception_class=exception_class
         )
 
+    async def delete(
+        self,
+        url: str,
+        headers: Dict[str, Any],
+        params: Dict[str, Any] = None,
+        exception_class=APIError
+    ) -> aiohttp.ClientResponse:
+        """Make a GET request"""
+        return await self.__wrapper(
+            method="delete",
+            url=url,
+            params=params,
+            headers=headers,
+            exception_class=exception_class
+        )
+
     async def __wrapper(
         self,
         method: str,
@@ -115,6 +131,10 @@ class APIWrapper:
                         params=params,
                         json=data
                     )
+
+                elif method == "delete":
+                    response = await self._session.delete(url, headers=headers, params=params)
+
                 else:
                     raise ValueError(f'Method \'{method}\' not supported')
 
@@ -127,7 +147,7 @@ Received a None response when querying."
                 end_time = time.time()
                 _LOGGER.debug("%s - %ss", response.status, end_time - start_time)
 
-                if response.status < 200 or response.status > 202:
+                if response.status < 200 or response.status > 204:
                     await self.__handle_response_error(
                         response=response,
                         exception_class=exception_class
@@ -148,7 +168,7 @@ Received a None response when querying."
             raise exception
 
         except (aiohttp.ClientError, gaierror) as exception:
-            message = "Error connecting to Pod Point ({url}) - {exception}"
+            message = f"Error connecting to Pod Point ({url}) - {exception}"
             raise ApiConnectionError(message) from exception
 
         except (AuthError, SessionError) as exception:

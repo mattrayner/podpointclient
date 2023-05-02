@@ -1,19 +1,22 @@
 """PodPoint Basic API Client."""
 import logging
 from typing import Dict, Any, List, Union
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import aiohttp
 
-from .endpoints import API_BASE_URL, CHARGE_SCHEDULES, PODS, UNITS, USERS, CHARGES, FIRMWARE, AUTH
+from .endpoints import API_BASE_URL, CHARGE_SCHEDULES, PODS, UNITS, USERS, CHARGES, FIRMWARE, AUTH, CHARGE_OVERRIDE
 from .helpers.auth import Auth
 from .helpers.functions import auth_headers
 from .helpers.api_wrapper import APIWrapper
-from .factories import PodFactory, ScheduleFactory, ChargeFactory, FirmwareFactory, UserFactory
+from .factories import PodFactory, ScheduleFactory, ChargeFactory, FirmwareFactory, UserFactory, ChargeOverrideFactory
 from .pod import Pod, Firmware
 from .charge import Charge
+from .charge_mode import ChargeMode
+from .charge_override import ChargeOverride
 from .schedule import Schedule
 from .user import User
+from .errors import ChargeOverrideValidationError
 
 TIMEOUT = 10
 
@@ -21,8 +24,8 @@ _LOGGER: logging.Logger = logging.getLogger(__package__)
 
 HEADERS = {"Content-type": "application/json; charset=UTF-8"}
 DEFAULT_POD_INCLUDES = ["statuses", "price", "model",
-                    "unit_connectors", "charge_schedules"]
-DEFAULT_USER_INCLUDES = ["account", "vehicle", "vehicle.make", "unit.pod.unit_connectors", "unit.pod.statuses", "unit.pod.model", "unit.pod.charge_schedules"]
+                    "unit_connectors", "charge_schedules", "charge_override"]
+DEFAULT_USER_INCLUDES = ["account", "vehicle", "vehicle.make", "unit.pod.unit_connectors", "unit.pod.statuses", "unit.pod.model", "unit.pod.charge_schedules", "unit.pod.charge_override"]
 
 class PodPointClient:
     """API Client for communicating with Pod Point."""
@@ -230,6 +233,112 @@ class PodPointClient:
 
         return user
 
+    async def async_get_charge_override(self, pod: Pod) -> Union[None, ChargeOverride]:
+        await self.auth.async_update_access_token()
+        
+        response = await self.api_wrapper.get(
+            url=self._url_from_path(
+                path=f"{UNITS}/{pod.unit_id}{CHARGE_OVERRIDE}"),
+            params=self._generate_complete_params(params=None),
+            headers=auth_headers(access_token=self.auth.access_token)
+        )
+
+        # If there is no charge mode (smart mode), return None
+        if response.status == 204:
+            return None
+
+        json = await self._handle_json_response(response=response)
+
+        return ChargeOverrideFactory().build_charge_override(charge_override_response=json)
+
+
+    async def async_set_charge_override(self, pod:Pod, hours:int=0, minutes:int=0, seconds:int=0) -> ChargeOverride:
+        await self.auth.async_update_access_token()
+
+        valid_hours = (hours is not None and type(hours) is int and hours >= 0)
+        valid_minutes = (minutes is not None and type(minutes) is int  and minutes >= 0)
+        valid_seconds = (seconds is not None and type(seconds) is int  and seconds >= 0)
+        valid = (
+            valid_hours
+            and valid_minutes
+            and valid_seconds
+            and (
+                hours > 0
+                or minutes > 0
+                or seconds > 0
+            )
+        )
+
+        if valid is False:
+            raise ChargeOverrideValidationError()
+        
+        now = datetime.now().astimezone()
+        ends_at = now + timedelta(hours=hours, minutes=minutes, seconds=seconds)
+        datetime_format_string = "%Y-%m-%dT%H:%M:%S%z"
+
+        body = {
+            "requested_at": now.strftime(datetime_format_string),
+            "ends_at": ends_at.strftime(datetime_format_string)
+        }
+
+        response = await self.api_wrapper.put(
+            url=self._url_from_path(
+                path=f"{UNITS}/{pod.unit_id}{CHARGE_OVERRIDE}"),
+            params=self._generate_complete_params(params=None),
+            body=body,
+            headers=auth_headers(access_token=self.auth.access_token)
+        )
+
+        json = await self._handle_json_response(response=response)
+
+        return ChargeOverrideFactory().build_charge_override(charge_override_response=json)
+
+    async def async_set_charge_mode_manual(self, pod) -> bool:
+        """Set user's pod into 'manual' charge mode"""
+        await self.auth.async_update_access_token()
+
+        body = {
+            "requested_at": datetime.now().astimezone().strftime("%Y-%m-%dT%H:%M:%S%z") #2023-04-25T09:35:34+01:00
+        }
+
+        response = await self._async_set_charge_mode(pod, body)
+
+        expected_response = (
+            response.ppid == pod.ppid 
+            and response.requested_at is not None
+            and response.received_at is not None
+            and response.ends_at is None)
+
+        return expected_response
+
+    async def async_set_charge_mode_smart(self, pod) -> bool:
+        """Set the user's pod into 'smart' charge mode"""
+        response = await self.api_wrapper.delete(
+            url=self._url_from_path(
+                path=f"{UNITS}/{pod.unit_id}{CHARGE_OVERRIDE}"
+            ),
+            params=self._generate_complete_params(params=None),
+            headers=auth_headers(access_token=self.auth.access_token)
+        )
+
+        return response.status == 204
+
+ 
+    async def _async_set_charge_mode(self, pod, body) -> ChargeMode:
+        """Given a body object, set the charge mode for a user's pod"""
+        response = await self.api_wrapper.put(
+            url=self._url_from_path(
+                path=f"{UNITS}/{pod.unit_id}{CHARGE_OVERRIDE}"),
+            params=self._generate_complete_params(params=None),
+            body=body,
+            headers=auth_headers(access_token=self.auth.access_token)
+        )
+
+        json = await self._handle_json_response(response=response)
+
+        return ChargeOverrideFactory().build_charge_override(charge_override_response=json)
+
+
     def _schedule_data(self, enabled: bool) -> Dict[str, Any]:
         """Generate a new schedule body with all the enable attributes set to the `enabled` value"""
         schedules: List[Schedule] = ScheduleFactory(
@@ -251,7 +360,7 @@ class PodPointClient:
         if params is None:
             params = {}
 
-        params["timestamp"] = datetime.now().timestamp()
+        params["timestamp"] = datetime.now().astimezone().timestamp()
         return params
 
     async def _handle_json_response(self, response: aiohttp.ClientResponse) -> Dict[str, any]:
