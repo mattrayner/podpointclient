@@ -23,7 +23,7 @@ setup(
         "Operating System :: OS Independent",
     ],
     packages=find_packages(exclude=['tests']),
-    install_requires=["aiohttp", "StrEnum>=0.4,<0.5"],
+    install_requires=["aiohttp", "StrEnum>=0.4,<0.5", "pyt"],
     python_requires=">=3.7",
     keywords='Pod Point PodPoint',
     include_package_data=True,

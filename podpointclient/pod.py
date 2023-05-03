@@ -317,7 +317,7 @@ class Pod:
         if override.active:
             return ChargeMode.OVERRIDE
 
-        elif override.requested_at is not None and self.recieved_at is not None and self.ends_at is None:
+        elif override.requested_at is not None and override.received_at is not None and override.ends_at is None:
             return ChargeMode.MANUAL
 
         else:

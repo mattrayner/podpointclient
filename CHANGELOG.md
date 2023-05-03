@@ -1,5 +1,10 @@
 # Pod Point Client Changelog
 
+## v1.3.1
+
+* Add `pytz` as a dependency
+* Fix `Pod.charge_mode` bug
+
 ## v1.3.0
 
 * Migrate to API v5 - @mattrayner
