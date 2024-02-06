@@ -15,16 +15,15 @@ import json
 import pytz
 from datetime import timedelta
 
-from podpointclient.endpoints import API_BASE_URL, AUTH, CHARGE_SCHEDULES, CHARGES, FIRMWARE, PODS, SESSIONS, UNITS, USERS, CHARGE_OVERRIDE
+from podpointclient.endpoints import GOOGLE_BASE_URL, PASSWORD_VERIFY, API_BASE_URL, AUTH, CHARGE_SCHEDULES, CHARGES, FIRMWARE, PODS, SESSIONS, UNITS, USERS, CHARGE_OVERRIDE
 
 @pytest.mark.asyncio
 @freeze_time("Jan 1st, 2022")
 async def test_async_credentials_verified():
     auth_response = {
-        "token_type": "Bearer",
-        "expires_in": 1234,
-        "access_token": "1234",
-        "refresh_token": "1234"
+        "idToken": "1234",
+        "expiresIn": 1234,
+        "refreshToken": "1234"
     }
     session_response = {
         "sessions": {
@@ -39,7 +38,7 @@ async def test_async_credentials_verified():
     }
     
     with aioresponses() as m:
-        m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
+        m.post(f'{GOOGLE_BASE_URL}{PASSWORD_VERIFY}', payload=auth_response)
         m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
         m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?include=&perpage=1&page=1&timestamp=1640995200.0', payload=pods_response)
 
@@ -52,10 +51,9 @@ async def test_async_credentials_verified():
 @freeze_time("Jan 1st, 2022")
 async def test_async_credentials_verified_returns_false_if_no_pods():
     auth_response = {
-        "token_type": "Bearer",
-        "expires_in": 1234,
-        "access_token": "1234",
-        "refresh_token": "1234"
+        "idToken": "1234",
+        "expiresIn": 1234,
+        "refreshToken": "1234"
     }
     session_response = {
         "sessions": {
@@ -68,7 +66,7 @@ async def test_async_credentials_verified_returns_false_if_no_pods():
     }
     
     with aioresponses() as m:
-        m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
+        m.post(f'{GOOGLE_BASE_URL}{PASSWORD_VERIFY}', payload=auth_response)
         m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
         m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?include=&perpage=1&page=1&timestamp=1640995200.0', payload=pods_response)
 
@@ -81,10 +79,9 @@ async def test_async_credentials_verified_returns_false_if_no_pods():
 @freeze_time("Jan 1st, 2022")
 async def test_async_credentials_verified_returns_false_if_body_unexpected():
     auth_response = {
-        "token_type": "Bearer",
-        "expires_in": 1234,
-        "access_token": "1234",
-        "refresh_token": "1234"
+        "idToken": "1234",
+        "expiresIn": 1234,
+        "refreshToken": "1234"
     }
     session_response = {
         "sessions": {
@@ -95,7 +92,7 @@ async def test_async_credentials_verified_returns_false_if_body_unexpected():
     pods_response = { "foo": "bar" }
     
     with aioresponses() as m:
-        m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
+        m.post(f'{GOOGLE_BASE_URL}{PASSWORD_VERIFY}', payload=auth_response)
         m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
         m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?include=&perpage=1&page=1&timestamp=1640995200.0', payload=pods_response)
 
@@ -108,10 +105,9 @@ async def test_async_credentials_verified_returns_false_if_body_unexpected():
 @freeze_time("Jan 1st, 2022")
 async def test_async_get_pods_response():
     auth_response = {
-        "token_type": "Bearer",
-        "expires_in": 1234,
-        "access_token": "1234",
-        "refresh_token": "1234"
+        "idToken": "1234",
+        "expiresIn": 1234,
+        "refreshToken": "1234"
     }
     session_response = {
         "sessions": {
@@ -126,7 +122,7 @@ async def test_async_get_pods_response():
     }
 
     with aioresponses() as m:
-        m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
+        m.post(f'{GOOGLE_BASE_URL}{PASSWORD_VERIFY}', payload=auth_response)
         m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
         m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?include=statuses%252Cprice%252Cmodel%252Cunit_connectors%252Ccharge_schedules%252Ccharge_override&perpage=5&page=1&timestamp=1640995200.0', payload=pods_response)
 
@@ -140,10 +136,9 @@ async def test_async_get_pods_response():
 @pytest.mark.asyncio
 async def test_async_get_pods_response_without_timestamp():
     auth_response = {
-        "token_type": "Bearer",
-        "expires_in": 1234,
-        "access_token": "1234",
-        "refresh_token": "1234"
+        "idToken": "1234",
+        "expiresIn": 1234,
+        "refreshToken": "1234"
     }
     session_response = {
         "sessions": {
@@ -158,7 +153,7 @@ async def test_async_get_pods_response_without_timestamp():
     }
 
     with aioresponses() as m:
-        m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
+        m.post(f'{GOOGLE_BASE_URL}{PASSWORD_VERIFY}', payload=auth_response)
         m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
         m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?include=statuses%252Cprice%252Cmodel%252Cunit_connectors%252Ccharge_schedules%252Ccharge_override&perpage=5&page=1', payload=pods_response)
 
@@ -172,10 +167,9 @@ async def test_async_get_pods_response_without_timestamp():
 @pytest.mark.asyncio
 async def test_async_get_all_pods_response():
     auth_response = {
-        "token_type": "Bearer",
-        "expires_in": 1234,
-        "access_token": "1234",
-        "refresh_token": "1234"
+        "idToken": "1234",
+        "expiresIn": 1234,
+        "refreshToken": "1234"
     }
     session_response = {
         "sessions": {
@@ -201,7 +195,7 @@ async def test_async_get_all_pods_response():
     }
 
     with aioresponses() as m:
-        m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
+        m.post(f'{GOOGLE_BASE_URL}{PASSWORD_VERIFY}', payload=auth_response)
         m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
         m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?include=statuses%252Cprice%252Cmodel%252Cunit_connectors%252Ccharge_schedules%252Ccharge_override&perpage=5&page=1', payload=pods_response)
         m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?include=statuses%252Cprice%252Cmodel%252Cunit_connectors%252Ccharge_schedules%252Ccharge_override&perpage=5&page=2', payload=pods_response)
@@ -218,10 +212,9 @@ async def test_async_get_all_pods_response():
 @freeze_time("Jan 1st, 2022")
 async def test_async_get_all_pods_response_with_includes_overridden_and_timestamp():
     auth_response = {
-        "token_type": "Bearer",
-        "expires_in": 1234,
-        "access_token": "1234",
-        "refresh_token": "1234"
+        "idToken": "1234",
+        "expiresIn": 1234,
+        "refreshToken": "1234"
     }
     session_response = {
         "sessions": {
@@ -247,7 +240,7 @@ async def test_async_get_all_pods_response_with_includes_overridden_and_timestam
     }
 
     with aioresponses() as m:
-        m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
+        m.post(f'{GOOGLE_BASE_URL}{PASSWORD_VERIFY}', payload=auth_response)
         m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
         m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?include=foo%252Cbar&perpage=5&page=1&timestamp=1640995200.0', payload=pods_response)
         m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?include=foo%252Cbar&perpage=5&page=2&timestamp=1640995200.0', payload=pods_response_short)
@@ -263,10 +256,9 @@ async def test_async_get_all_pods_response_with_includes_overridden_and_timestam
 @freeze_time("Jan 1st, 2022")
 async def test_async_get_all_pods_response_with_includes_empty_and_timestamp():
     auth_response = {
-        "token_type": "Bearer",
-        "expires_in": 1234,
-        "access_token": "1234",
-        "refresh_token": "1234"
+        "idToken": "1234",
+        "expiresIn": 1234,
+        "refreshToken": "1234"
     }
     session_response = {
         "sessions": {
@@ -292,7 +284,7 @@ async def test_async_get_all_pods_response_with_includes_empty_and_timestamp():
     }
 
     with aioresponses() as m:
-        m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
+        m.post(f'{GOOGLE_BASE_URL}{PASSWORD_VERIFY}', payload=auth_response)
         m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
         m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?perpage=5&page=1&timestamp=1640995200.0', payload=pods_response)
         m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?perpage=5&page=2&timestamp=1640995200.0', payload=pods_response_short)
@@ -308,10 +300,9 @@ async def test_async_get_all_pods_response_with_includes_empty_and_timestamp():
 @freeze_time("Jan 1st, 2022")
 async def test_async_set_schedules_response():
     auth_response = {
-        "token_type": "Bearer",
-        "expires_in": 1234,
-        "access_token": "1234",
-        "refresh_token": "1234"
+        "idToken": "1234",
+        "expiresIn": 1234,
+        "refreshToken": "1234"
     }
     session_response = {
         "sessions": {
@@ -328,7 +319,7 @@ async def test_async_set_schedules_response():
     schedules_response = json.load(open('./tests/fixtures/create_schedules.json'))
 
     with aioresponses() as m:
-        m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
+        m.post(f'{GOOGLE_BASE_URL}{PASSWORD_VERIFY}', payload=auth_response)
         m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
         m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?include=statuses%252Cprice%252Cmodel%252Cunit_connectors%252Ccharge_schedules%252Ccharge_override&perpage=all&timestamp=1640995200.0', payload=pods_response)
         m.put(f'{API_BASE_URL}{UNITS}/198765{CHARGE_SCHEDULES}?timestamp=1640995200.0', status=201, payload=schedules_response)
@@ -346,10 +337,9 @@ async def test_async_set_schedules_response():
 @freeze_time("Jan 1st, 2022")
 async def test_async_get_charges_response():
     auth_response = {
-        "token_type": "Bearer",
-        "expires_in": 1234,
-        "access_token": "1234",
-        "refresh_token": "1234"
+        "idToken": "1234",
+        "expiresIn": 1234,
+        "refreshToken": "1234"
     }
     session_response = {
         "sessions": {
@@ -364,7 +354,7 @@ async def test_async_get_charges_response():
     charges_reponse_empty = json.load(open('./tests/fixtures/charges_empty.json'))
 
     with aioresponses() as m:
-        m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
+        m.post(f'{GOOGLE_BASE_URL}{PASSWORD_VERIFY}', payload=auth_response)
         m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
         m.get(f'{API_BASE_URL}{USERS}/1234{CHARGES}?perpage=all&page=1&timestamp=1640995200.0', payload=charges_reponse)
         m.get(f'{API_BASE_URL}{USERS}/1234{CHARGES}?perpage=5&page=1&timestamp=1640995200.0', payload=charges_reponse_small)
@@ -513,10 +503,9 @@ async def test__schedule_data():
 @freeze_time("Jan 1st, 2022")
 async def test_async_get_firmware():
     auth_response = {
-        "token_type": "Bearer",
-        "expires_in": 1234,
-        "access_token": "1234",
-        "refresh_token": "1234"
+        "idToken": "1234",
+        "expiresIn": 1234,
+        "refreshToken": "1234"
     }
     session_response = {
         "sessions": {
@@ -528,7 +517,7 @@ async def test_async_get_firmware():
     firmware_response = json.load(open('./tests/fixtures/complete_firmware.json'))
 
     with aioresponses() as m:
-        m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
+        m.post(f'{GOOGLE_BASE_URL}{PASSWORD_VERIFY}', payload=auth_response)
         m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
         m.get(f'{API_BASE_URL}{UNITS}/198765{FIRMWARE}?timestamp=1640995200.0', payload=firmware_response)
         m.get(f'{API_BASE_URL}{UNITS}/198765{FIRMWARE}', payload=firmware_response)
@@ -551,10 +540,9 @@ async def test_async_get_firmware():
 @freeze_time("Jan 1st, 2022")
 async def test_async_get_user():
     auth_response = {
-        "token_type": "Bearer",
-        "expires_in": 1234,
-        "access_token": "1234",
-        "refresh_token": "1234"
+        "idToken": "1234",
+        "expiresIn": 1234,
+        "refreshToken": "1234"
     }
     session_response = {
         "sessions": {
@@ -564,7 +552,7 @@ async def test_async_get_user():
     }
     user_data = json.load(open('./tests/fixtures/complete_user.json'))
     with aioresponses() as m:
-        m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
+        m.post(f'{GOOGLE_BASE_URL}{PASSWORD_VERIFY}', payload=auth_response)
         m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
         m.get(f'{API_BASE_URL}{AUTH}?include=account,vehicle,vehicle.make,unit.pod.unit_connectors,unit.pod.statuses,unit.pod.model,unit.pod.charge_schedules,unit.pod.charge_override&timestamp=1640995200.0', payload=user_data)
         m.get(f'{API_BASE_URL}{AUTH}?include=account,vehicle,vehicle.make,unit.pod.unit_connectors,unit.pod.statuses,unit.pod.model,unit.pod.charge_schedules,unit.pod.charge_override', payload=user_data)
@@ -581,10 +569,9 @@ async def test_async_get_user():
 @freeze_time("Jan 1st, 2022")
 async def test_async_set_schedules_response():
     auth_response = {
-        "token_type": "Bearer",
-        "expires_in": 1234,
-        "access_token": "1234",
-        "refresh_token": "1234"
+        "idToken": "1234",
+        "expiresIn": 1234,
+        "refreshToken": "1234"
     }
     session_response = {
         "sessions": {
@@ -601,7 +588,7 @@ async def test_async_set_schedules_response():
     schedules_response = json.load(open('./tests/fixtures/create_schedules.json'))
 
     with aioresponses() as m:
-        m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
+        m.post(f'{GOOGLE_BASE_URL}{PASSWORD_VERIFY}', payload=auth_response)
         m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
         m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?include=statuses%252Cprice%252Cmodel%252Cunit_connectors%252Ccharge_schedules%252Ccharge_override&perpage=all&timestamp=1640995200.0', payload=pods_response)
         m.put(f'{API_BASE_URL}{UNITS}/198765{CHARGE_SCHEDULES}?timestamp=1640995200.0', status=201, payload=schedules_response)
@@ -619,10 +606,9 @@ async def test_async_set_schedules_response():
 @freeze_time("Jan 1st, 2022")
 async def test_async_get_all_charges_response():
     auth_response = {
-        "token_type": "Bearer",
-        "expires_in": 1234,
-        "access_token": "1234",
-        "refresh_token": "1234"
+        "idToken": "1234",
+        "expiresIn": 1234,
+        "refreshToken": "1234"
     }
     session_response = {
         "sessions": {
@@ -634,7 +620,7 @@ async def test_async_get_all_charges_response():
     charges_reponse_small_page_2 = json.load(open('./tests/fixtures/small_charges_page_2.json'))
 
     with aioresponses() as m:
-        m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
+        m.post(f'{GOOGLE_BASE_URL}{PASSWORD_VERIFY}', payload=auth_response)
         m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
         m.get(f'{API_BASE_URL}{USERS}/1234{CHARGES}?perpage=50&page=1&timestamp=1640995200.0', payload=charges_reponse_large)
         m.get(f'{API_BASE_URL}{USERS}/1234{CHARGES}?perpage=50&page=2&timestamp=1640995200.0', payload=charges_reponse_small_page_2)
@@ -651,10 +637,9 @@ async def test_async_get_all_charges_response():
 @freeze_time("Jan 1st, 2022")
 async def test_async_get_charge_override_with_an_empty_response_meaning_smart_mode():
     auth_response = {
-        "token_type": "Bearer",
-        "expires_in": 1234,
-        "access_token": "1234",
-        "refresh_token": "1234"
+        "idToken": "1234",
+        "expiresIn": 1234,
+        "refreshToken": "1234"
     }
     session_response = {
         "sessions": {
@@ -664,7 +649,7 @@ async def test_async_get_charge_override_with_an_empty_response_meaning_smart_mo
     }
 
     with aioresponses() as m:
-        m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
+        m.post(f'{GOOGLE_BASE_URL}{PASSWORD_VERIFY}', payload=auth_response)
         m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
         m.get(f'{API_BASE_URL}{UNITS}/1234{CHARGE_OVERRIDE}?timestamp=1640995200.0', body="", status=204)
 
@@ -677,10 +662,9 @@ async def test_async_get_charge_override_with_an_empty_response_meaning_smart_mo
 @freeze_time("Jan 1st, 2022")
 async def test_async_get_charge_override_with_a_manual_mode_response():
     auth_response = {
-        "token_type": "Bearer",
-        "expires_in": 1234,
-        "access_token": "1234",
-        "refresh_token": "1234"
+        "idToken": "1234",
+        "expiresIn": 1234,
+        "refreshToken": "1234"
     }
     session_response = {
         "sessions": {
@@ -696,7 +680,7 @@ async def test_async_get_charge_override_with_a_manual_mode_response():
     }
 
     with aioresponses() as m:
-        m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
+        m.post(f'{GOOGLE_BASE_URL}{PASSWORD_VERIFY}', payload=auth_response)
         m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
         m.get(f'{API_BASE_URL}{UNITS}/1234{CHARGE_OVERRIDE}?timestamp=1640995200.0', payload=override_response)
 
@@ -712,10 +696,9 @@ async def test_async_get_charge_override_with_a_manual_mode_response():
 @freeze_time("Jan 1st, 2022")
 async def test_async_get_charge_override_with_a_charge_override_time_response():
     auth_response = {
-        "token_type": "Bearer",
-        "expires_in": 1234,
-        "access_token": "1234",
-        "refresh_token": "1234"
+        "idToken": "1234",
+        "expiresIn": 1234,
+        "refreshToken": "1234"
     }
     session_response = {
         "sessions": {
@@ -731,7 +714,7 @@ async def test_async_get_charge_override_with_a_charge_override_time_response():
     }
 
     with aioresponses() as m:
-        m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
+        m.post(f'{GOOGLE_BASE_URL}{PASSWORD_VERIFY}', payload=auth_response)
         m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
         m.get(f'{API_BASE_URL}{UNITS}/1234{CHARGE_OVERRIDE}?timestamp=1640995200.0', payload=override_response)
 
@@ -747,10 +730,9 @@ async def test_async_get_charge_override_with_a_charge_override_time_response():
 @freeze_time("Jan 1st, 2022")
 async def test_async_set_charge_override_with_a_time_set():
     auth_response = {
-        "token_type": "Bearer",
-        "expires_in": 1234,
-        "access_token": "1234",
-        "refresh_token": "1234"
+        "idToken": "1234",
+        "expiresIn": 1234,
+        "refreshToken": "1234"
     }
     session_response = {
         "sessions": {
@@ -766,7 +748,7 @@ async def test_async_set_charge_override_with_a_time_set():
     }
 
     with aioresponses() as m:
-        m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
+        m.post(f'{GOOGLE_BASE_URL}{PASSWORD_VERIFY}', payload=auth_response)
         m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
         m.put(f'{API_BASE_URL}{UNITS}/1234{CHARGE_OVERRIDE}?timestamp=1640995200.0', status=201, payload=override_response)
 
@@ -782,10 +764,9 @@ async def test_async_set_charge_override_with_a_time_set():
 @freeze_time("Jan 1st, 2022")
 async def test_async_set_charge_override_with_an_invalid_time_set():
     auth_response = {
-        "token_type": "Bearer",
-        "expires_in": 1234,
-        "access_token": "1234",
-        "refresh_token": "1234"
+        "idToken": "1234",
+        "expiresIn": 1234,
+        "refreshToken": "1234"
     }
     session_response = {
         "sessions": {
@@ -801,7 +782,7 @@ async def test_async_set_charge_override_with_an_invalid_time_set():
     }
 
     with aioresponses() as m:
-        m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
+        m.post(f'{GOOGLE_BASE_URL}{PASSWORD_VERIFY}', payload=auth_response)
         m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
         m.put(f'{API_BASE_URL}{UNITS}/1234{CHARGE_OVERRIDE}?timestamp=1640995200.0', status=201, payload=override_response)
 
@@ -815,10 +796,9 @@ async def test_async_set_charge_override_with_an_invalid_time_set():
 @freeze_time("Jan 1st, 2022")
 async def test_async_set_charge_mode_manual_with_expected_response():
     auth_response = {
-        "token_type": "Bearer",
-        "expires_in": 1234,
-        "access_token": "1234",
-        "refresh_token": "1234"
+        "idToken": "1234",
+        "expiresIn": 1234,
+        "refreshToken": "1234"
     }
     session_response = {
         "sessions": {
@@ -834,7 +814,7 @@ async def test_async_set_charge_mode_manual_with_expected_response():
     }
 
     with aioresponses() as m:
-        m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
+        m.post(f'{GOOGLE_BASE_URL}{PASSWORD_VERIFY}', payload=auth_response)
         m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
         m.put(f'{API_BASE_URL}{UNITS}/1234{CHARGE_OVERRIDE}?timestamp=1640995200.0', status=201, payload=override_response)
 
@@ -847,10 +827,9 @@ async def test_async_set_charge_mode_manual_with_expected_response():
 @freeze_time("Jan 1st, 2022")
 async def test_async_set_charge_mode_manual_with_unexpected_response():
     auth_response = {
-        "token_type": "Bearer",
-        "expires_in": 1234,
-        "access_token": "1234",
-        "refresh_token": "1234"
+        "idToken": "1234",
+        "expiresIn": 1234,
+        "refreshToken": "1234"
     }
     session_response = {
         "sessions": {
@@ -861,7 +840,7 @@ async def test_async_set_charge_mode_manual_with_unexpected_response():
     override_response = {}
 
     with aioresponses() as m:
-        m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
+        m.post(f'{GOOGLE_BASE_URL}{PASSWORD_VERIFY}', payload=auth_response)
         m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
         m.put(f'{API_BASE_URL}{UNITS}/1234{CHARGE_OVERRIDE}?timestamp=1640995200.0', status=201, payload=override_response)
 
@@ -888,7 +867,7 @@ async def test_async_set_charge_mode_smart_with_204_response():
     }
 
     with aioresponses() as m:
-        m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
+        m.post(f'{GOOGLE_BASE_URL}{PASSWORD_VERIFY}', payload=auth_response)
         m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
         m.delete(f'{API_BASE_URL}{UNITS}/1234{CHARGE_OVERRIDE}?timestamp=1640995200.0', status=204)
 
@@ -901,10 +880,9 @@ async def test_async_set_charge_mode_smart_with_204_response():
 @freeze_time("Jan 1st, 2022")
 async def test_async_set_charge_mode_smart_with_unexpected_response():
     auth_response = {
-        "token_type": "Bearer",
-        "expires_in": 1234,
-        "access_token": "1234",
-        "refresh_token": "1234"
+        "idToken": "1234",
+        "expiresIn": 1234,
+        "refreshToken": "1234"
     }
     session_response = {
         "sessions": {
@@ -914,7 +892,7 @@ async def test_async_set_charge_mode_smart_with_unexpected_response():
     }
 
     with aioresponses() as m:
-        m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
+        m.post(f'{GOOGLE_BASE_URL}{PASSWORD_VERIFY}', payload=auth_response)
         m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
         m.delete(f'{API_BASE_URL}{UNITS}/1234{CHARGE_OVERRIDE}?timestamp=1640995200.0', status=200)
 

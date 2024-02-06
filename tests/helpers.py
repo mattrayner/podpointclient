@@ -1,7 +1,7 @@
 import json
 import os
 
-from podpointclient.endpoints import API_BASE_URL, AUTH, CHARGE_SCHEDULES, PODS, SESSIONS, UNITS, USERS, CHARGES, FIRMWARE
+from podpointclient.endpoints import GOOGLE_BASE_URL, PASSWORD_VERIFY, API_BASE_URL, AUTH, CHARGE_SCHEDULES, PODS, SESSIONS, UNITS, USERS, CHARGES, FIRMWARE
 
 class Mocks:
     def __init__(self, m = None) -> None:
@@ -24,7 +24,7 @@ class Mocks:
             and_timestamp = f'&{timestamp}'
             question_timestamp = f'?{timestamp}'
 
-        self.m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
+        self.m.post(f'{GOOGLE_BASE_URL}{PASSWORD_VERIFY}', payload=auth_response)
         self.m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
         self.m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?perpage=1&page=1{and_timestamp}', payload=pods_response)
         self.m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?perpage=5&page=1&include=statuses,price,model,unit_connectors,charge_schedules,charge_override{and_timestamp}', payload=pods_response)

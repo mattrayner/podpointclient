@@ -8,7 +8,7 @@ import asyncio
 from aioresponses import aioresponses
 import logging
 
-from podpointclient.endpoints import API_BASE, API_BASE_URL, API_VERSION, AUTH, SESSIONS
+from podpointclient.endpoints import GOOGLE_BASE_URL, PASSWORD_VERIFY, API_BASE_URL, API_VERSION, AUTH, SESSIONS
 
 import pytest
 
@@ -62,10 +62,9 @@ async def test_access_token_not_set():
 @pytest.mark.asyncio
 async def test_update_access_token_when_not_set(aiohttp_client):
     auth_response = {
-        "token_type": "Bearer",
-        "expires_in": 1234,
-        "access_token": "1234",
-        "refresh_token": "1234"
+        "expiresIn": 1234,
+        "idToken": "1234",
+        "refreshToken": "1234"
     }
     session_response = {
         "sessions": {
@@ -75,7 +74,7 @@ async def test_update_access_token_when_not_set(aiohttp_client):
     }
 
     with aioresponses() as m:
-        m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
+        m.post(f'{GOOGLE_BASE_URL}{PASSWORD_VERIFY}', payload=auth_response)
         m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
 
         async with aiohttp.ClientSession() as session:
@@ -92,10 +91,9 @@ async def test_update_access_token_when_not_set(aiohttp_client):
 @pytest.mark.asyncio
 async def test_auth_with_session_error(aiohttp_client):
     auth_response = {
-        "token_type": "Bearer",
-        "expires_in": 1234,
-        "access_token": "1234",
-        "refresh_token": "1234"
+        "expiresIn": 1234,
+        "idToken": "1234",
+        "refreshToken": "1234"
     }
     session_response = {
         "foo": {
@@ -105,7 +103,7 @@ async def test_auth_with_session_error(aiohttp_client):
     }
 
     with aioresponses() as m:
-        m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
+        m.post(f'{GOOGLE_BASE_URL}{PASSWORD_VERIFY}', payload=auth_response)
         m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
 
         async with aiohttp.ClientSession() as session:
@@ -120,10 +118,9 @@ async def test_auth_with_session_error(aiohttp_client):
 @pytest.mark.asyncio
 async def test_auth_with_auth_error(aiohttp_client):
     auth_response = {
-        "token_type": "Bearer",
-        "expires_in": 1234,
-        "access_token": "1234",
-        "refresh_token": "1234"
+        "expiresIn": 1234,
+        "idToken": "1234",
+        "refreshToken": "1234"
     }
     session_response = {
         "session": {
@@ -133,7 +130,7 @@ async def test_auth_with_auth_error(aiohttp_client):
     }
 
     with aioresponses() as m:
-        m.post(f'{API_BASE_URL}{AUTH}', status=201, payload=auth_response)
+        m.post(f'{GOOGLE_BASE_URL}{PASSWORD_VERIFY}', status=201, payload=auth_response)
 
         async with aiohttp.ClientSession() as session:
             auth = subject(session)
@@ -148,10 +145,9 @@ async def test_auth_with_auth_error(aiohttp_client):
 @pytest.mark.asyncio
 async def test_update_access_token_when_not_set(aiohttp_client):
     auth_response = {
-        "token_type": "Bearer",
-        "expires_in": 1234,
-        "access_token": "1234",
-        "refresh_token": "1234"
+        "expiresIn": 1234,
+        "idToken": "1234",
+        "refreshToken": "1234"
     }
     session_response = {
         "sessions": {
@@ -161,14 +157,14 @@ async def test_update_access_token_when_not_set(aiohttp_client):
     }
 
     with aioresponses() as m:
-        m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
+        m.post(f'{GOOGLE_BASE_URL}{PASSWORD_VERIFY}', payload=auth_response)
         m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
 
         async with aiohttp.ClientSession() as session:
             auth = expired_subject(session)
             assert auth.access_token_expiry < datetime.now()
 
-            m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
+            m.post(f'{GOOGLE_BASE_URL}{PASSWORD_VERIFY}', payload=auth_response)
             m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
 
             result2 = await auth.async_update_access_token()
@@ -183,7 +179,7 @@ async def test_update_access_token_when_token_valid():
 
 async def test_auth_401_error():
     with aioresponses() as m:
-        m.post(f'{API_BASE_URL}{AUTH}', status=401 , body="foo error")
+        m.post(f'{GOOGLE_BASE_URL}{PASSWORD_VERIFY}', status=401 , body="foo error")
 
         async with aiohttp.ClientSession() as session:
             auth = expired_subject(session)
@@ -196,13 +192,12 @@ async def test_auth_401_error():
 async def test_auth_json_error():
     # MISSING ELEMENT
     auth_response = {
-        "token_type": "Bearer",
-        "expires_in": "a74f3",
-        "refresh_token": "1234"
+        "expiresIn": 1234,
+        "refreshToken": "1234"
     }
 
     with aioresponses() as m:
-        m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
+        m.post(f'{GOOGLE_BASE_URL}{PASSWORD_VERIFY}', payload=auth_response)
 
         async with aiohttp.ClientSession() as session:
             auth = expired_subject(session)
@@ -210,18 +205,17 @@ async def test_auth_json_error():
             with pytest.raises(AuthError) as exc_info:   
                 await auth.async_update_access_token()
 
-            assert "Auth Error (200) - Error processing access token response. 'access_token' not found in json." in str(exc_info.value)
+            assert "Auth Error (200) - Error processing access token response. 'idToken' not found in json." in str(exc_info.value)
 
     # INVALID EXPIRES_IN
     auth_response = {
-        "token_type": "Bearer",
-        "expires_in": "F14A3",
-        "access_token": "1234",
-        "refresh_token": "1234"
+        "expiresIn": "F14A3",
+        "idToken": "1234",
+        "refreshToken": "1234"
     }
 
     with aioresponses() as m:
-        m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
+        m.post(f'{GOOGLE_BASE_URL}{PASSWORD_VERIFY}', payload=auth_response)
 
         async with aiohttp.ClientSession() as session:
             auth = expired_subject(session)
@@ -234,14 +228,13 @@ async def test_auth_json_error():
 
 async def test_session_401_error():
     auth_response = {
-        "token_type": "Bearer",
-        "expires_in": 1234,
-        "access_token": "1234",
-        "refresh_token": "1234"
+        "expiresIn": 1234,
+        "idToken": "1234",
+        "refreshToken": "1234"
     }
 
     with aioresponses() as m:
-        m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
+        m.post(f'{GOOGLE_BASE_URL}{PASSWORD_VERIFY}', payload=auth_response)
         m.post(f'{API_BASE_URL}{SESSIONS}', status=401, body="bar error")
 
         async with aiohttp.ClientSession() as session:
@@ -254,10 +247,9 @@ async def test_session_401_error():
 
 async def test_session_json_error():
     auth_response = {
-        "token_type": "Bearer",
-        "expires_in": 1234,
-        "access_token": "1234",
-        "refresh_token": "1234"
+        "idToken": "1234",
+        "expiresIn": 1234,
+        "refreshToken": "1234"
     }
     session_response = {
         "sessions": {
@@ -266,7 +258,7 @@ async def test_session_json_error():
     }
 
     with aioresponses() as m:
-        m.post(f'{API_BASE_URL}{AUTH}', payload=auth_response)
+        m.post(f'{GOOGLE_BASE_URL}{PASSWORD_VERIFY}', payload=auth_response)
         m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
 
         async with aiohttp.ClientSession() as session:

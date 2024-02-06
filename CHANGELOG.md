@@ -1,5 +1,9 @@
 # Pod Point Client Changelog
 
+## v1.4.0
+
+* Update auth system to new Google-based auth from Pod Point
+
 ## v1.3.1
 
 * Add `pytz` as a dependency

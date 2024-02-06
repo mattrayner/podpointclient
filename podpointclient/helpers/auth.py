@@ -7,7 +7,7 @@ import aiohttp
 
 from ..errors import APIError, AuthError, SessionError
 from .session import Session
-from ..endpoints import API_BASE_URL, AUTH
+from ..endpoints import GOOGLE_BASE_URL, PASSWORD_VERIFY
 from .functions import HEADERS
 from .api_wrapper import APIWrapper
 
@@ -25,6 +25,7 @@ class Auth():
         self.email: str = email
         self.password: str = password
         self.access_token: str = None
+        self.refresh_token: str = None
         self.access_token_expiry: datetime = None
         self._session: aiohttp.ClientSession = session
         self._api_wrapper: APIWrapper = APIWrapper(session=self._session)
@@ -39,14 +40,18 @@ class Auth():
 
     def check_access_token(self) -> bool:
         """Does the current access token need refreshing?"""
-        access_token_set: bool = (
-            self.access_token is not None and self.access_token_expiry is not None
-        )
-        access_token_not_expired: bool = (
-            access_token_set and datetime.now() < self.access_token_expiry
+        access_token_not_expired: bool = self.access_token_expired() is False
+
+        return bool(self.access_token_set() and access_token_not_expired)
+
+    def access_token_set(self) -> bool:
+        return (
+                self.access_token is not None and self.access_token_expiry is not None
         )
 
-        return bool(access_token_set and access_token_not_expired)
+    def access_token_expired(self) -> bool:
+        """Is the current access token expired"""
+        return self.access_token_set() and datetime.now() > self.access_token_expiry
 
     async def async_update_access_token(self) -> bool:
         """Update access token, if needed."""
@@ -54,7 +59,6 @@ class Auth():
             return True
 
         try:
-            session_created: bool = False
             _LOGGER.debug('Updating access token')
             access_token_updated: bool = await self.__update_access_token()
 
@@ -83,14 +87,14 @@ class Auth():
             _LOGGER.error("Error creating session. %s", exception)
             raise exception
 
-    async def __update_access_token(self) -> bool:
+    async def __update_access_token(self, refresh: bool = False) -> bool:
         return_value = False
 
         try:
             wrapper = APIWrapper(session=self._session)
             response = await wrapper.post(
-                url=f"{API_BASE_URL}{AUTH}",
-                body={"username": self.email, "password": self.password},
+                url=f"{GOOGLE_BASE_URL}{PASSWORD_VERIFY}",
+                body={"username": self.email, "returnSecureToken": True, "password": self.password},
                 headers=HEADERS,
                 exception_class=AuthError)
 
@@ -98,9 +102,10 @@ class Auth():
                 await self.__handle_response_error(response, AuthError)
 
             json = await response.json()
-            self.access_token = json["access_token"]
+            self.access_token = json["idToken"]
+            self.refresh_token = json["refreshToken"]
             self.access_token_expiry = datetime.now() + timedelta(
-                seconds=json["expires_in"] - 10
+                seconds=json["expiresIn"] - 10
             )
             return_value = True
 
