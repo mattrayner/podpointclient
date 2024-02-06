@@ -1,5 +1,9 @@
 # Pod Point Client Changelog
 
+## v1.4.1
+
+* Add additional debug logs for testing new google auth
+
 ## v1.4.0
 
 * Update auth system to new Google-based auth from Pod Point
