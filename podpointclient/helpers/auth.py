@@ -94,7 +94,7 @@ class Auth():
             wrapper = APIWrapper(session=self._session)
             response = await wrapper.post(
                 url=f"{GOOGLE_BASE_URL}{PASSWORD_VERIFY}",
-                body={"username": self.email, "returnSecureToken": True, "password": self.password},
+                body={"email": self.email, "returnSecureToken": True, "password": self.password},
                 headers=HEADERS,
                 exception_class=AuthError)
 
