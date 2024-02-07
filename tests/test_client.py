@@ -22,7 +22,7 @@ from podpointclient.endpoints import GOOGLE_BASE_URL, PASSWORD_VERIFY, API_BASE_
 async def test_async_credentials_verified():
     auth_response = {
         "idToken": "1234",
-        "expiresIn": 1234,
+        "expiresIn": "1234",
         "refreshToken": "1234"
     }
     session_response = {
@@ -52,7 +52,7 @@ async def test_async_credentials_verified():
 async def test_async_credentials_verified_returns_false_if_no_pods():
     auth_response = {
         "idToken": "1234",
-        "expiresIn": 1234,
+        "expiresIn": "1234",
         "refreshToken": "1234"
     }
     session_response = {
@@ -80,7 +80,7 @@ async def test_async_credentials_verified_returns_false_if_no_pods():
 async def test_async_credentials_verified_returns_false_if_body_unexpected():
     auth_response = {
         "idToken": "1234",
-        "expiresIn": 1234,
+        "expiresIn": "1234",
         "refreshToken": "1234"
     }
     session_response = {
@@ -106,7 +106,7 @@ async def test_async_credentials_verified_returns_false_if_body_unexpected():
 async def test_async_get_pods_response():
     auth_response = {
         "idToken": "1234",
-        "expiresIn": 1234,
+        "expiresIn": "1234",
         "refreshToken": "1234"
     }
     session_response = {
@@ -137,7 +137,7 @@ async def test_async_get_pods_response():
 async def test_async_get_pods_response_without_timestamp():
     auth_response = {
         "idToken": "1234",
-        "expiresIn": 1234,
+        "expiresIn": "1234",
         "refreshToken": "1234"
     }
     session_response = {
@@ -168,7 +168,7 @@ async def test_async_get_pods_response_without_timestamp():
 async def test_async_get_all_pods_response():
     auth_response = {
         "idToken": "1234",
-        "expiresIn": 1234,
+        "expiresIn": "1234",
         "refreshToken": "1234"
     }
     session_response = {
@@ -213,7 +213,7 @@ async def test_async_get_all_pods_response():
 async def test_async_get_all_pods_response_with_includes_overridden_and_timestamp():
     auth_response = {
         "idToken": "1234",
-        "expiresIn": 1234,
+        "expiresIn": "1234",
         "refreshToken": "1234"
     }
     session_response = {
@@ -257,7 +257,7 @@ async def test_async_get_all_pods_response_with_includes_overridden_and_timestam
 async def test_async_get_all_pods_response_with_includes_empty_and_timestamp():
     auth_response = {
         "idToken": "1234",
-        "expiresIn": 1234,
+        "expiresIn": "1234",
         "refreshToken": "1234"
     }
     session_response = {
@@ -301,7 +301,7 @@ async def test_async_get_all_pods_response_with_includes_empty_and_timestamp():
 async def test_async_set_schedules_response():
     auth_response = {
         "idToken": "1234",
-        "expiresIn": 1234,
+        "expiresIn": "1234",
         "refreshToken": "1234"
     }
     session_response = {
@@ -338,7 +338,7 @@ async def test_async_set_schedules_response():
 async def test_async_get_charges_response():
     auth_response = {
         "idToken": "1234",
-        "expiresIn": 1234,
+        "expiresIn": "1234",
         "refreshToken": "1234"
     }
     session_response = {
@@ -504,7 +504,7 @@ async def test__schedule_data():
 async def test_async_get_firmware():
     auth_response = {
         "idToken": "1234",
-        "expiresIn": 1234,
+        "expiresIn": "1234",
         "refreshToken": "1234"
     }
     session_response = {
@@ -541,7 +541,7 @@ async def test_async_get_firmware():
 async def test_async_get_user():
     auth_response = {
         "idToken": "1234",
-        "expiresIn": 1234,
+        "expiresIn": "1234",
         "refreshToken": "1234"
     }
     session_response = {
@@ -570,7 +570,7 @@ async def test_async_get_user():
 async def test_async_set_schedules_response():
     auth_response = {
         "idToken": "1234",
-        "expiresIn": 1234,
+        "expiresIn": "1234",
         "refreshToken": "1234"
     }
     session_response = {
@@ -607,7 +607,7 @@ async def test_async_set_schedules_response():
 async def test_async_get_all_charges_response():
     auth_response = {
         "idToken": "1234",
-        "expiresIn": 1234,
+        "expiresIn": "1234",
         "refreshToken": "1234"
     }
     session_response = {
@@ -638,7 +638,7 @@ async def test_async_get_all_charges_response():
 async def test_async_get_charge_override_with_an_empty_response_meaning_smart_mode():
     auth_response = {
         "idToken": "1234",
-        "expiresIn": 1234,
+        "expiresIn": "1234",
         "refreshToken": "1234"
     }
     session_response = {
@@ -663,7 +663,7 @@ async def test_async_get_charge_override_with_an_empty_response_meaning_smart_mo
 async def test_async_get_charge_override_with_a_manual_mode_response():
     auth_response = {
         "idToken": "1234",
-        "expiresIn": 1234,
+        "expiresIn": "1234",
         "refreshToken": "1234"
     }
     session_response = {
@@ -697,7 +697,7 @@ async def test_async_get_charge_override_with_a_manual_mode_response():
 async def test_async_get_charge_override_with_a_charge_override_time_response():
     auth_response = {
         "idToken": "1234",
-        "expiresIn": 1234,
+        "expiresIn": "1234",
         "refreshToken": "1234"
     }
     session_response = {
@@ -731,7 +731,7 @@ async def test_async_get_charge_override_with_a_charge_override_time_response():
 async def test_async_set_charge_override_with_a_time_set():
     auth_response = {
         "idToken": "1234",
-        "expiresIn": 1234,
+        "expiresIn": "1234",
         "refreshToken": "1234"
     }
     session_response = {
@@ -765,7 +765,7 @@ async def test_async_set_charge_override_with_a_time_set():
 async def test_async_set_charge_override_with_an_invalid_time_set():
     auth_response = {
         "idToken": "1234",
-        "expiresIn": 1234,
+        "expiresIn": "1234",
         "refreshToken": "1234"
     }
     session_response = {
@@ -797,7 +797,7 @@ async def test_async_set_charge_override_with_an_invalid_time_set():
 async def test_async_set_charge_mode_manual_with_expected_response():
     auth_response = {
         "idToken": "1234",
-        "expiresIn": 1234,
+        "expiresIn": "1234",
         "refreshToken": "1234"
     }
     session_response = {
@@ -828,7 +828,7 @@ async def test_async_set_charge_mode_manual_with_expected_response():
 async def test_async_set_charge_mode_manual_with_unexpected_response():
     auth_response = {
         "idToken": "1234",
-        "expiresIn": 1234,
+        "expiresIn": "1234",
         "refreshToken": "1234"
     }
     session_response = {
@@ -881,7 +881,7 @@ async def test_async_set_charge_mode_smart_with_204_response():
 async def test_async_set_charge_mode_smart_with_unexpected_response():
     auth_response = {
         "idToken": "1234",
-        "expiresIn": 1234,
+        "expiresIn": "1234",
         "refreshToken": "1234"
     }
     session_response = {

@@ -105,7 +105,7 @@ class Auth():
             self.access_token = json["idToken"]
             self.refresh_token = json["refreshToken"]
             self.access_token_expiry = datetime.now() + timedelta(
-                seconds=json["expiresIn"] - 10
+                seconds=int(json["expiresIn"]) - 10
             )
             return_value = True
 
@@ -118,7 +118,7 @@ class Auth():
                 response.status,
                 f"Error processing access token response. {exception} not found in json."
             ) from exception
-        except TypeError as exception:
+        except (TypeError, ValueError) as exception:
             raise AuthError(
                 response.status,
                 f"Error processing access token response. \
