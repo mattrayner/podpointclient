@@ -34,54 +34,18 @@ Method | Description
 
 ### Example
 
-The below walks through a common scenario: 
+Included in the project is `example.py` which walks through a common scenario: 
 
 1. Get all pods
 1. Get firmware and serial number data for one pod
 1. Updating the schedule of an individual pod
 1. Confirm that it worked
+1. Get information from the last charge
 
-> `PodPointClient` is async by default so the below example assumes you are running it within an async function.
+> You must provide your email address and password to the script as detailed below:
 
-```python
-from podpointclient import PodPointClient
-
-# Create a client
-client = PodPointClient(username="test@example.com", password="passw0rd!1")
-
-# Verify credentials work
-verified = await client.async_credentials_verified()
-print(verified)
-
-# Get user information
-user = await client.async_get_user()
-print(f"Account balance {user.account.balance}p")
-
-# Get all pods for a user
-pods = await client.async_get_all_pods()
-
-# Select one to update schedules for
-pod = pods[0]
-
-# Get firmware information for the pod
-firmwares = await client.async_get_firmware(pod=pod)
-firmware = firmwares[0]
-print(firmware.serial_number)
-print(firmware.update_available)
-
-# Update schedule to disabled (allow charging at any time)
-await client.async_set_schedule(enabled=False, pod=pod)
-
-# Get just that pod
-pod = await client.async_get_pod(pod_id=pod.id)
-# Check if the schedule is disabled
-schedule_status = pod.charge_schedules[0].is_active
-print(schedule_status)
-
-# Print last charge energy use
-charges = await client.async_get_charges(perpage=1, page=1)
-energy_used = charges[0].kwh_used
-print(energy_used)
+```bash
+python3 example.py --email PODPOINTEMAIL --password PODPOINTPASSWORD
 ```
 
 ### Setting charging schedules
