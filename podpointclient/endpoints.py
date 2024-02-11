@@ -12,11 +12,11 @@ FIRMWARE = '/firmware'
 
 API_BASE = 'mobile-api.pod-point.com/api3/'
 API_VERSION = 'v5'
-API_BASE_URL = 'https://' + API_BASE + '/' + API_VERSION
+API_BASE_URL = f"https://{API_BASE}{API_VERSION}"
 
 """Google endpoint, used for auth"""
 GOOGLE_KEY = '?key=AIzaSyCwhF8IOl_7qHXML0pOd5HmziYP46IZAGU'
-PASSWORD_VERIFY = '/verifyPassword' + GOOGLE_KEY
+PASSWORD_VERIFY = f"/verifyPassword{GOOGLE_KEY}"
 
 GOOGLE_BASE = 'www.googleapis.com/identitytoolkit/v3/relyingparty'
-GOOGLE_BASE_URL = 'https://' + GOOGLE_BASE
+GOOGLE_BASE_URL = f"https://{GOOGLE_BASE}"
