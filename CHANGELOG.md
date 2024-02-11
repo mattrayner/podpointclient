@@ -1,5 +1,9 @@
 # Pod Point Client Changelog
 
+## v1.4.3
+
+* Remove additional / from pod point api calls
+
 ## v1.4.2
 
 * Fix an issue with `Session` inside of `Auth` causing token re-authentication to fail
