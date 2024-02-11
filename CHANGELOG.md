@@ -1,5 +1,9 @@
 # Pod Point Client Changelog
 
+## v1.4.2
+
+* Fix an issue with `Session` inside of `Auth` causing token re-authentication to fail
+
 ## v1.4.1
 
 * Add additional debug logs for testing new google auth
