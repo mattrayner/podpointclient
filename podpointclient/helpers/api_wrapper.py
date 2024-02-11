@@ -72,6 +72,23 @@ class APIWrapper:
             headers=headers,
             exception_class=exception_class
         )
+    async def post_form_data(
+        self,
+        url: str,
+        body: Any,
+        headers: Dict[str, Any],
+        params: Dict[str, Any] = None,
+        exception_class=APIError
+    ) -> aiohttp.ClientResponse:
+        """Make a POST request"""
+        return await self.__wrapper(
+            method="post_data",
+            url=url,
+            params=params,
+            data=body,
+            headers=headers,
+            exception_class=exception_class
+        )
 
     async def delete(
         self,
@@ -130,6 +147,16 @@ class APIWrapper:
                         headers=headers,
                         params=params,
                         json=data
+                    )
+
+                # ToDo: Fix this, we need to look again at the pattern for this, maybe determine based on data type?
+                #  THIS REALLY SMELLS
+                elif method == "post_data":
+                    response = await self._session.post(
+                        url,
+                        headers=headers,
+                        params=params,
+                        data=data
                     )
 
                 elif method == "delete":

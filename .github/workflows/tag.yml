@@ -2,14 +2,13 @@ name: Push actions
 
 on:
   push:
-    branches:
-      - main
-      - dev
+    tags:
+      - '*'
 
 jobs:
   tests:
     runs-on: "ubuntu-latest"
-    name: Run tests
+    name: Test and release
     steps:
       - name: Check out code from GitHub
         uses: "actions/checkout@v3"
@@ -37,3 +36,9 @@ jobs:
         with:
           name: code-coverage-report
           path: htmlcov/*
+      - name: Build release package
+        run: make package
+      - name: Publish package
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}

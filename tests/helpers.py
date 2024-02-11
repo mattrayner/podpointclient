@@ -1,7 +1,7 @@
 import json
 import os
 
-from podpointclient.endpoints import GOOGLE_BASE_URL, PASSWORD_VERIFY, API_BASE_URL, AUTH, CHARGE_SCHEDULES, PODS, SESSIONS, UNITS, USERS, CHARGES, FIRMWARE
+from podpointclient.endpoints import GOOGLE_BASE_URL, PASSWORD_VERIFY, API_BASE_URL, AUTH, CHARGE_SCHEDULES, PODS, SESSIONS, UNITS, USERS, CHARGES, FIRMWARE, GOOGLE_TOKEN_BASE_URL, TOKEN
 
 class Mocks:
     def __init__(self, m = None) -> None:
@@ -9,6 +9,7 @@ class Mocks:
 
     def happy_path(self, include_timestamp=False):
         auth_response = self.auth_response()
+        refresh_response = self.refresh_response()
         session_response = self.session_response()
         pods_response = self.pods_response()
         pods_response_schedule_disabled = self.pods_response_schedule_disabled()
@@ -25,6 +26,7 @@ class Mocks:
             question_timestamp = f'?{timestamp}'
 
         self.m.post(f'{GOOGLE_BASE_URL}{PASSWORD_VERIFY}', payload=auth_response)
+        self.m.post(f'{GOOGLE_TOKEN_BASE_URL}{TOKEN}', payload=refresh_response)
         self.m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
         self.m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?perpage=1&page=1{and_timestamp}', payload=pods_response)
         self.m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?perpage=5&page=1&include=statuses,price,model,unit_connectors,charge_schedules,charge_override{and_timestamp}', payload=pods_response)
@@ -36,6 +38,9 @@ class Mocks:
 
     def auth_response(self):
         return self.__json_load_fixture('auth')
+
+    def refresh_response(self):
+        return self.__json_load_fixture('refresh')
 
     def session_response(self):
         return self.__json_load_fixture('session')

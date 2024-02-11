@@ -1,5 +1,10 @@
 # Pod Point Client Changelog
 
+## v1.5.0
+
+* Add support for refreshing expired tokens, rather than grabbing new ones each time
+* Update example.py to demonstrate token expiry
+
 ## v1.4.3
 
 * Remove additional / from pod point api calls
