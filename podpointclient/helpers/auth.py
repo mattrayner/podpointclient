@@ -27,6 +27,7 @@ class Auth():
         self.access_token: str = None
         self.refresh_token: str = None
         self.access_token_expiry: datetime = None
+        self.session: Session = None
         self._session: aiohttp.ClientSession = session
         self._api_wrapper: APIWrapper = APIWrapper(session=self._session)
         self._http_debug: bool = http_debug if http_debug is not None else False
@@ -34,8 +35,8 @@ class Auth():
     @property
     def user_id(self):
         """Return the user_id for a given session"""
-        if self._session:
-            return self._session.user_id
+        if self.session:
+            return self.session.user_id
         return None
 
     def check_access_token(self) -> bool:
@@ -67,14 +68,14 @@ class Auth():
                 self.access_token_expiry
             )
 
-            self._session = Session(
+            self.session = Session(
                 email=self.email,
                 password=self.password,
                 access_token=self.access_token,
                 session=self._session,
                 http_debug=self._http_debug
             )
-            session_created = await self._session.create()
+            session_created = await self.session.create()
 
             if session_created is False:
                 _LOGGER.error("Error creating session")
