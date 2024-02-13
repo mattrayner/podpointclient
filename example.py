@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from podpointclient.client import PodPointClient
 import asyncio
 import aiohttp
@@ -19,10 +20,14 @@ async def main(username: str, password: str, http_debug: bool = False, loop=None
 
     # Verify credentials work
     verified = await client.async_credentials_verified()
-    print(f"  Credentials verified: {verified}")
+    print(f"Credentials verified: {verified}")
+    print(f"  Token expiry: {client.auth.access_token_expiry}")
 
-    print("Getting user details")
+    print("Sleeping 2s")
+    time.sleep(2)
+
     # Get user information
+    print("Getting user details")
     user = await client.async_get_user()
     print(f"  Account balance {user.account.balance}p")
 
@@ -35,7 +40,7 @@ async def main(username: str, password: str, http_debug: bool = False, loop=None
     pod = pods[0]
     print(f"Selecting first pod: {pod.ppid}")
 
-    # Get firmware information for the pod
+    # Get firmware information for the pod
     firmwares = await client.async_get_firmware(pod=pod)
     firmware = firmwares[0]
     print(f"Gettnig firmware data for {pod.ppid}")
@@ -57,6 +62,17 @@ async def main(username: str, password: str, http_debug: bool = False, loop=None
     charges = await client.async_get_charges(perpage=1, page=1)
     energy_used = charges[0].kwh_used
     print(f"  kW charged: {energy_used}")
+
+    # Expire token and exchange a refresh
+    print("Expiring token and refreshing...")
+    client.auth.access_token_expiry = datetime.now() - timedelta(minutes=10)
+    updated = await client.auth.async_update_access_token()
+    print(f"  Token updated? {updated} - New expiry: {client.auth.access_token_expiry}")
+
+    # Get user information again
+    print("Getting user details with new token")
+    user = await client.async_get_user()
+    print(f"  Account balance {user.account.balance}p")
 
 if __name__ == "__main__":
     import time

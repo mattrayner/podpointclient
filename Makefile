@@ -13,6 +13,7 @@ spec:
 		--cov-report html \
 		-o console_output_style=count \
 		-p no:sugar \
+		-s \
 		tests
 
 lint:

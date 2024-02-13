@@ -1,0 +1,8 @@
+{
+  "access_token": "1234",
+  "id_token": "1234",
+  "refresh_token": "1234",
+  "expires_in": "1234",
+  "token_type": "Bearer",
+  "user_id": "11111111-1111-1111-1111-11111111111"
+}
