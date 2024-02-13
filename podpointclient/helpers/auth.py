@@ -104,22 +104,24 @@ class Auth():
                 headers = HEADERS.copy()
                 headers["Content-type"] = 'application/x-www-form-urlencoded'
 
+                url = f"{GOOGLE_TOKEN_BASE_URL}{TOKEN}"
+                body = f"grant_type=refresh_token&refresh_token={self.refresh_token}"
+
                 id_token_response = 'id_token'
                 refresh_token_response = 'refresh_token'
                 expires_in_response = 'expires_in'
-
-                response = await wrapper.post_form_data(
-                    url=f"{GOOGLE_TOKEN_BASE_URL}{TOKEN}",
-                    body=f"grant_type=refresh_token&refresh_token={self.refresh_token}",
-                    headers=headers,
-                    exception_class=AuthError)
             else:
                 _LOGGER.debug('Getting a new access token')
-                response = await wrapper.post(
-                    url=f"{GOOGLE_BASE_URL}{PASSWORD_VERIFY}",
-                    body={"email": self.email, "returnSecureToken": True, "password": self.password},
-                    headers=HEADERS,
-                    exception_class=AuthError)
+
+                url = f"{GOOGLE_BASE_URL}{PASSWORD_VERIFY}"
+                body = {"email": self.email, "returnSecureToken": True, "password": self.password}
+                headers = HEADERS.copy()
+
+            response = await wrapper.post(
+                url=url,
+                body=body,
+                headers=headers,
+                exception_class=AuthError)
 
             if response.status != 200:
                 await self.__handle_response_error(response, AuthError)
