@@ -84,3 +84,11 @@ def test_connectivity_state_to_json(connectivity_state_data):
     cs = ConnectivityStatus(connectivity_state_data)
     json_data = cs.to_json()
     assert isinstance(json_data, str)
+
+
+def test_connectivity_status_properties(connectivity_state_data):
+    cs = ConnectivityStatus(connectivity_state_data)
+    assert cs.connectivity_status == "ONLINE"
+    assert cs.last_message_at == datetime(2024, 4, 5, 18, 36, 29, tzinfo=timezone.utc)
+    assert cs.charging_state == "SUSPENDED_EV"
+    assert cs.offering_energy is True

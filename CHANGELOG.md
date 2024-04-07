@@ -6,6 +6,7 @@
   * `Client.async_get_connection_status` - @mattrayner
 * Add support for charge override deletion:
   * Add `Client.async_delete_charge_override` - @mattrayner
+* Add `ConnectivityStatus` - @mattrayner
 
 ## v1.5.0
 

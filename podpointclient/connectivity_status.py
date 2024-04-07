@@ -161,6 +161,71 @@ class ConnectivityStatus:
             "evses": [evse.dict for evse in self.evses]
         }
 
+    @property
+    def connectivity_status(self):
+        """Return the connectivity status of the first evse"""
+        evse = self.evses[0]
+        if evse is None:
+            return None
+
+        connectivity_state = evse.connectivity_state
+        if connectivity_state is None:
+            return None
+
+        return connectivity_state.connectivity_status
+
+    @property
+    def connectivity_status(self):
+        """Return the connectivity status of the first evse"""
+        evse = self.evses[0]
+        if evse is None:
+            return None
+
+        connectivity_state = evse.connectivity_state
+        if connectivity_state is None:
+            return None
+
+        return connectivity_state.connectivity_status
+
+    @property
+    def last_message_at(self):
+        """Return the last message at of the first evse"""
+        evse = self.evses[0]
+        if evse is None:
+            return None
+
+        connectivity_state = evse.connectivity_state
+        if connectivity_state is None:
+            return None
+
+        return connectivity_state.last_message_at
+
+    @property
+    def charging_state(self):
+        """Return the charging state of the first evse"""
+        evse = self.evses[0]
+        if evse is None:
+            return None
+
+        connector = evse.connectors[0]
+        if connector is None:
+            return None
+
+        return connector.charging_state
+
+    @property
+    def offering_energy(self):
+        """Return the offering energy of the first evse"""
+        evse = self.evses[0]
+        if evse is None:
+            return None
+
+        energy_offer_status = evse.energy_offer_status
+        if energy_offer_status is None:
+            return None
+
+        return energy_offer_status.is_offering_energy
+
     def to_json(self):
         """JSON representation of a ConnectivityState object"""
         return json.dumps(self.dict, ensure_ascii=False)
