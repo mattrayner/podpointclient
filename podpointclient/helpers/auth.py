@@ -7,7 +7,7 @@ import aiohttp
 
 from ..errors import APIError, AuthError, SessionError
 from .session import Session
-from ..endpoints import GOOGLE_BASE_URL, PASSWORD_VERIFY
+from ..endpoints import GOOGLE_BASE_URL, PASSWORD_VERIFY, GOOGLE_TOKEN_BASE_URL, TOKEN
 from .functions import HEADERS
 from .api_wrapper import APIWrapper
 
@@ -61,7 +61,9 @@ class Auth():
 
         try:
             _LOGGER.debug('Updating access token')
-            access_token_updated: bool = await self.__update_access_token()
+            access_token_updated: bool = await self.__update_access_token(
+                refresh=self.access_token_expired()
+            )
 
             _LOGGER.debug(
                 "Updated access token. New expiration: %s",
@@ -90,23 +92,45 @@ class Auth():
 
     async def __update_access_token(self, refresh: bool = False) -> bool:
         return_value = False
+        id_token_response = 'idToken'
+        refresh_token_response = 'refreshToken'
+        expires_in_response = 'expiresIn'
 
         try:
             wrapper = APIWrapper(session=self._session)
+
+            if refresh:
+                _LOGGER.debug('Refreshing access token')
+                headers = HEADERS.copy()
+                headers["Content-type"] = 'application/x-www-form-urlencoded'
+
+                url = f"{GOOGLE_TOKEN_BASE_URL}{TOKEN}"
+                body = f"grant_type=refresh_token&refresh_token={self.refresh_token}"
+
+                id_token_response = 'id_token'
+                refresh_token_response = 'refresh_token'
+                expires_in_response = 'expires_in'
+            else:
+                _LOGGER.debug('Getting a new access token')
+
+                url = f"{GOOGLE_BASE_URL}{PASSWORD_VERIFY}"
+                body = {"email": self.email, "returnSecureToken": True, "password": self.password}
+                headers = HEADERS.copy()
+
             response = await wrapper.post(
-                url=f"{GOOGLE_BASE_URL}{PASSWORD_VERIFY}",
-                body={"email": self.email, "returnSecureToken": True, "password": self.password},
-                headers=HEADERS,
+                url=url,
+                body=body,
+                headers=headers,
                 exception_class=AuthError)
 
             if response.status != 200:
                 await self.__handle_response_error(response, AuthError)
 
             json = await response.json()
-            self.access_token = json["idToken"]
-            self.refresh_token = json["refreshToken"]
+            self.access_token = json[id_token_response]
+            self.refresh_token = json[refresh_token_response]
             self.access_token_expiry = datetime.now() + timedelta(
-                seconds=int(json["expiresIn"]) - 10
+                seconds=int(json[expires_in_response]) - 10
             )
             return_value = True
 
@@ -133,5 +157,8 @@ When calculating expiry date, got: {exception}."
     async def __handle_response_error(self, response, error_class):
         status = response.status
         response = await response.text()
+
+        if self._http_debug:
+            _LOGGER.debug(response)
 
         raise error_class(status, response)

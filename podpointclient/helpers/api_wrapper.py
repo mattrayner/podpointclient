@@ -125,12 +125,20 @@ class APIWrapper:
                     )
 
                 elif method == "post":
-                    response = await self._session.post(
-                        url,
-                        headers=headers,
-                        params=params,
-                        json=data
-                    )
+                    if isinstance(data, str):
+                        response = await self._session.post(
+                            url,
+                            headers=headers,
+                            params=params,
+                            data=data
+                        )
+                    else:
+                        response = await self._session.post(
+                            url,
+                            headers=headers,
+                            params=params,
+                            json=data
+                        )
 
                 elif method == "delete":
                     response = await self._session.delete(url, headers=headers, params=params)
