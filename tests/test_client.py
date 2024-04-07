@@ -7,15 +7,17 @@ from typing import List
 from podpointclient.pod import Pod, Firmware
 from podpointclient.charge import Charge
 from podpointclient.charge_override import ChargeOverride
+from podpointclient.connectivity_status import ConnectivityStatus, Evse
 from podpointclient.user import User
 from podpointclient.errors import ChargeOverrideValidationError
 import pytest
+from datetime import datetime, timezone
 from freezegun import freeze_time
 import json
 import pytz
 from datetime import timedelta
 
-from podpointclient.endpoints import GOOGLE_BASE_URL, PASSWORD_VERIFY, API_BASE_URL, AUTH, CHARGE_SCHEDULES, CHARGES, FIRMWARE, PODS, SESSIONS, UNITS, USERS, CHARGE_OVERRIDE
+from podpointclient.endpoints import GOOGLE_BASE_URL, PASSWORD_VERIFY, API_BASE_URL, AUTH, CHARGE_SCHEDULES, CHARGES, FIRMWARE, PODS, SESSIONS, UNITS, USERS, CHARGE_OVERRIDE, MOBILE_API_BASE_URL, CHARGERS, CONNECTIVITY_STATUS
 
 @pytest.mark.asyncio
 @freeze_time("Jan 1st, 2022")
@@ -791,7 +793,158 @@ async def test_async_set_charge_override_with_an_invalid_time_set():
 
             with pytest.raises(ChargeOverrideValidationError):
                 await client.async_set_charge_override(pod=Pod(data={"unit_id": 1234}), hours=-3, minutes=0, seconds="a")
-            
+
+
+@pytest.mark.asyncio
+@freeze_time("Jan 1st, 2022")
+async def test_async_delete_charge_override_with_a_204_response():
+    auth_response = {
+        "idToken": "1234",
+        "expiresIn": "1234",
+        "refreshToken": "1234"
+    }
+    session_response = {
+        "sessions": {
+            "id": "1234",
+            "user_id": "1234"
+        }
+    }
+
+    with aioresponses() as m:
+        m.post(f'{GOOGLE_BASE_URL}{PASSWORD_VERIFY}', payload=auth_response)
+        m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
+        m.delete(f'{API_BASE_URL}{UNITS}/1234{CHARGE_OVERRIDE}?timestamp=1640995200.0', status=204)
+
+        async with aiohttp.ClientSession() as session:
+            client = PodPointClient(username="1233", password="1234", session=session, include_timestamp=True)
+
+            response = await client.async_delete_charge_override(pod=Pod(data={"unit_id": 1234}))
+            assert response is True
+
+
+@pytest.mark.asyncio
+@freeze_time("Jan 1st, 2022")
+async def test_async_delete_charge_override_with_non_204_response():
+    auth_response = {
+        "idToken": "1234",
+        "expiresIn": "1234",
+        "refreshToken": "1234"
+    }
+    session_response = {
+        "sessions": {
+            "id": "1234",
+            "user_id": "1234"
+        }
+    }
+
+    with aioresponses() as m:
+        m.post(f'{GOOGLE_BASE_URL}{PASSWORD_VERIFY}', payload=auth_response)
+        m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
+        m.delete(f'{API_BASE_URL}{UNITS}/1234{CHARGE_OVERRIDE}?timestamp=1640995200.0', status=201)
+
+        async with aiohttp.ClientSession() as session:
+            client = PodPointClient(username="1233", password="1234", session=session, include_timestamp=True)
+
+            response = await client.async_delete_charge_override(pod=Pod(data={"unit_id": 1234}))
+            assert response is False
+
+
+@pytest.mark.asyncio
+@freeze_time("Jan 1st, 2022")
+async def test_async_get_connectivity_status():
+    auth_response = {
+        "idToken": "1234",
+        "expiresIn": "1234",
+        "refreshToken": "1234"
+    }
+    session_response = {
+        "sessions": {
+            "id": "1234",
+            "user_id": "1234"
+        }
+    }
+    connectivity_status_response = {
+        "ppid": "PSL-123456",
+        "evses": [
+            {
+                "id": 1,
+                "connectivityState": {
+                    "protocol": "POW",
+                    "connectivityStatus": "ONLINE",
+                    "signalStrength": -68,
+                    "lastMessageAt": "2024-04-05T18:36:29Z",
+                    "connectionStartedAt": "2024-04-05T18:26:26.819Z",
+                    "connectionQuality": 3
+                },
+                "connectors": [{
+                    "id": 1,
+                    "door": "A",
+                    "chargingState": "SUSPENDED_EV"
+                }],
+                "architecture": "arch3",
+                "energyOfferStatus": {
+                    "isOfferingEnergy": True,
+                    "reason": "CHARGE_SCHEDULE",
+                    "until": None,
+                    "randomDelay": None,
+                    "doNotCache": False
+                }
+            }
+        ],
+        "connectedComponents": ["evse"]
+    }
+
+    with aioresponses() as m:
+        m.post(f'{GOOGLE_BASE_URL}{PASSWORD_VERIFY}', payload=auth_response)
+        m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
+        m.get(f'{MOBILE_API_BASE_URL}{CHARGERS}/PSL-123456{CONNECTIVITY_STATUS}?timestamp=1640995200.0', payload=connectivity_status_response)
+
+        async with aiohttp.ClientSession() as session:
+            client = PodPointClient(username="1233", password="1234", session=session, include_timestamp=True)
+
+            connectivity_status_response = await client.async_get_connectivity_status(pod=Pod(data={"ppid": "PSL-123456"}))
+
+            assert connectivity_status_response is not None
+            assert ConnectivityStatus == type(connectivity_status_response)
+            assert connectivity_status_response.ppid == "PSL-123456"
+            assert connectivity_status_response.connected_components == ["evse"]
+            assert len(connectivity_status_response.evses) == 1
+            assert Evse == type(connectivity_status_response.evses[0])
+            assert connectivity_status_response.evses[0].id == 1
+            assert connectivity_status_response.evses[0].connectivity_state.protocol == "POW"
+            assert connectivity_status_response.evses[0].connectivity_state.connectivity_status == "ONLINE"
+            assert connectivity_status_response.evses[0].connectivity_state.signal_strength == -68
+            assert connectivity_status_response.evses[0].connectivity_state.last_message_at == datetime(
+                year=2024,
+                month=4,
+                day=5,
+                hour=18,
+                minute=36,
+                second=29,
+                tzinfo=timezone.utc
+            )
+            assert connectivity_status_response.evses[0].connectivity_state.connection_started_at == datetime(
+                year=2024,
+                month=4,
+                day=5,
+                hour=18,
+                minute=26,
+                second=26,
+                microsecond=819000,
+                tzinfo=timezone.utc
+            )
+            assert connectivity_status_response.evses[0].connectivity_state.connection_quality == 3
+            assert connectivity_status_response.evses[0].connectors[0].id == 1
+            assert connectivity_status_response.evses[0].connectors[0].door == "A"
+            assert connectivity_status_response.evses[0].connectors[0].charging_state == "SUSPENDED_EV"
+            assert connectivity_status_response.evses[0].architecture == "arch3"
+            assert connectivity_status_response.evses[0].energy_offer_status.is_offering_energy is True
+            assert connectivity_status_response.evses[0].energy_offer_status.reason == "CHARGE_SCHEDULE"
+            assert connectivity_status_response.evses[0].energy_offer_status.until is None
+            assert connectivity_status_response.evses[0].energy_offer_status.random_delay is None
+            assert connectivity_status_response.evses[0].energy_offer_status.do_not_cache == False
+
+
 @pytest.mark.asyncio
 @freeze_time("Jan 1st, 2022")
 async def test_async_set_charge_mode_manual_with_expected_response():

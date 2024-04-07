@@ -5,6 +5,7 @@ from .user import User
 from .schedule import Schedule, ScheduleStatus
 from .charge import Charge
 from .charge_override import ChargeOverride
+from .connectivity_status import ConnectivityStatus
 
 class PodFactory:
     """Factory for creating Pod objects"""
@@ -96,3 +97,12 @@ class UserFactory:
             return None
 
         return User(data=user_data)
+
+class ConnectivityStatusFactory:
+    """Factory  for creating ConnectivityStatus objects"""
+    def build_connectivity_status(self, connectivity_status_response: Dict[str, Any]):
+        """Build a ConnectivityStatus object based off of a response from pod point"""
+        if connectivity_status_response is None:
+            return None
+
+        return ConnectivityStatus(data=connectivity_status_response)

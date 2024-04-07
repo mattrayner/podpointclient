@@ -81,6 +81,9 @@ class Mocks:
     def user_response(self):
         return self.__json_load_fixture('complete_user')
 
+    def connectivity_status_response(self):
+        return self.__json_load_fixture('connectivity_status')
+
     def __json_load_fixture(self, fixture_name: str):
         file_location = os.path.dirname(__file__)
         path = f'fixtures/{fixture_name}.json'
