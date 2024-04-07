@@ -1,0 +1,28 @@
+{
+  "ppid": "PSL-123456",
+  "evses": [{
+    "id": 1,
+    "connectivityState": {
+      "protocol": "POW",
+      "connectivityStatus": "ONLINE",
+      "signalStrength": -68,
+      "lastMessageAt": "2024-04-05T18:26:28Z",
+      "connectionStartedAt": "2024-04-05T18:26:26.819Z",
+      "connectionQuality": 3
+    },
+    "connectors": [{
+      "id": 1,
+      "door": "A",
+      "chargingState": "SUSPENDED_EV"
+    }],
+    "architecture": "arch3",
+    "energyOfferStatus": {
+      "isOfferingEnergy": true,
+      "reason": "CHARGE_SCHEDULE",
+      "until": null,
+      "randomDelay": null,
+      "doNotCache": false
+    }
+  }],
+  "connectedComponents": ["evses"]
+}

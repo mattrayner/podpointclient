@@ -1,5 +1,12 @@
 # Pod Point Client Changelog
 
+## v1.6.0
+
+* Add getting connection status from API:
+  * `Client.async_get_connection_status` - @mattrayner
+* Add support for charge override deletion:
+  * Add `Client.async_delete_charge_override` - @mattrayner
+
 ## v1.5.0
 
 * Add support for refreshing expired tokens, rather than grabbing new ones each time
@@ -61,7 +68,7 @@
 * Added additional testing dependencies - @mattrayner
 * Add CD pipeline, when a new tag/release is pushed, auto-publish to PyPi - @mattrayner
 
-## v0.3.0
+## v0.3.0
 
 * Add http_debug flag - @mattrayner
 * When enabled, complete response bodies will be sent to logger.debug
@@ -69,7 +76,7 @@
 * Completed a pylon pass to standardize the code base - @mattrayner
 * Improved test coverage - @mattrayner
 
-## v0.2.2
+## v0.2.2
 
 * Make timestamp=XXX optional, and off by default
 * Greatly improve test coverage

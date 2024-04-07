@@ -63,6 +63,27 @@ async def main(username: str, password: str, http_debug: bool = False, loop=None
     energy_used = charges[0].kwh_used
     print(f"  kW charged: {energy_used}")
 
+    # Set charge override
+    print(f"Setting 'Charge now' for pod {pod.ppid}")
+    override = await client.async_set_charge_override(pod=pod, hours=1)
+    print(f"  Override until: {override.ends_at}")
+
+    # Delete override
+    print(f"Deleting 'Charge now' for pod {pod.ppid}")
+    await client.async_delete_charge_override(pod=pod)
+    print("  Done")
+
+    # Get charge override
+    print(f"Attempting to get charge override for pod {pod.ppid}")
+    override = await client.async_get_charge_override(pod=pod)
+    print(f"  Override ends at: {override.ends_at}")
+
+    # Get connectivity status
+    print(f"Getting connectivity status for pod {pod.ppid}")
+    connectivity = await client.async_get_connectivity_status(pod=pod)
+    print(f"  Connectivity status: {connectivity.evses[0].connectivity_state.connectivity_status}")
+    print(f"  Last message at: {connectivity.evses[0].connectivity_state.last_message_at}")
+
     # Expire token and exchange a refresh
     print("Expiring token and refreshing...")
     client.auth.access_token_expiry = datetime.now() - timedelta(minutes=10)

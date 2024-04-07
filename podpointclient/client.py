@@ -5,15 +5,16 @@ from datetime import datetime, timedelta
 
 import aiohttp
 
-from .endpoints import API_BASE_URL, CHARGE_SCHEDULES, PODS, UNITS, USERS, CHARGES, FIRMWARE, AUTH, CHARGE_OVERRIDE
+from .endpoints import API_BASE_URL, CHARGE_SCHEDULES, PODS, UNITS, USERS, CHARGES, FIRMWARE, AUTH, CHARGE_OVERRIDE, CHARGERS, CONNECTIVITY_STATUS, MOBILE_API_BASE_URL
 from .helpers.auth import Auth
 from .helpers.functions import auth_headers
 from .helpers.api_wrapper import APIWrapper
-from .factories import PodFactory, ScheduleFactory, ChargeFactory, FirmwareFactory, UserFactory, ChargeOverrideFactory
+from .factories import PodFactory, ScheduleFactory, ChargeFactory, FirmwareFactory, UserFactory, ChargeOverrideFactory, ConnectivityStatusFactory
 from .pod import Pod, Firmware
 from .charge import Charge
 from .charge_mode import ChargeMode
 from .charge_override import ChargeOverride
+from .connectivity_status import ConnectivityStatus
 from .schedule import Schedule
 from .user import User
 from .errors import ChargeOverrideValidationError
@@ -251,6 +252,33 @@ class PodPointClient:
 
         return ChargeOverrideFactory().build_charge_override(charge_override_response=json)
 
+    async def async_delete_charge_override(self, pod:Pod) -> bool:
+        await self.auth.async_update_access_token()
+
+        response = await self.api_wrapper.delete(
+            url=self._url_from_path(
+                path=f"{UNITS}/{pod.unit_id}{CHARGE_OVERRIDE}"),
+            params=self._generate_complete_params(params=None),
+            headers=auth_headers(access_token=self.auth.access_token)
+        )
+
+        return response.status == 204
+
+    async def async_get_connectivity_status(self, pod:Pod) -> ConnectivityStatus:
+        await self.auth.async_update_access_token()
+
+        response = await self.api_wrapper.get(
+            url=self._url_from_path(
+                path=f"{CHARGERS}/{pod.ppid}{CONNECTIVITY_STATUS}",
+                base=MOBILE_API_BASE_URL
+            ),
+            params=self._generate_complete_params(params=None),
+            headers=auth_headers(access_token=self.auth.access_token)
+        )
+
+        json = await self._handle_json_response(response=response)
+
+        return ConnectivityStatusFactory().build_connectivity_status(connectivity_status_response=json)
 
     async def async_set_charge_override(self, pod:Pod, hours:int=0, minutes:int=0, seconds:int=0) -> ChargeOverride:
         await self.auth.async_update_access_token()
@@ -348,9 +376,9 @@ class PodPointClient:
 
         return {"data": d_list}
 
-    def _url_from_path(self, path: str) -> str:
+    def _url_from_path(self, path: str, base: str = API_BASE_URL) -> str:
         """Given a path, return a complete API URL"""
-        return f"{API_BASE_URL}{path}"
+        return f"{base}{path}"
 
     def _generate_complete_params(self, params: Union[None, Dict[str, Any]]) -> Dict[str, any]:
         """Given a params object, add optional params if required"""
