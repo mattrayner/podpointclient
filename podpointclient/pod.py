@@ -11,6 +11,7 @@ from .schedule import Schedule, ScheduleStatus
 from .charge import Charge
 from .charge_mode import ChargeMode
 from .charge_override import ChargeOverride
+from .connectivity_status import ConnectivityStatus
 
 
 class StatusName(StrEnum):
@@ -165,6 +166,7 @@ class Pod:
         self.offering_energy: bool     = False
         self.last_message_at: datetime = None
         self.charging_state: str       = None
+        self.connectivity_status: ConnectivityStatus = None
 
         self.firmware: Union(Firmware, None) = None
 
@@ -288,7 +290,8 @@ class Pod:
             "charge_override": None,
             "offering_energy": self.offering_energy,
             "last_message_at": lazy_iso_format_datetime(self.last_message_at),
-            "charging_state": self.charging_state if self.charging_state is not None else "Unknown"
+            "charging_state": self.charging_state if self.charging_state is not None else "Unknown",
+            "connectivity_status": self.connectivity_status.dict if self.connectivity_status is not None else None,
         }
 
         for status in self.statuses:
