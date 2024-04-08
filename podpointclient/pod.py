@@ -160,6 +160,9 @@ class Pod:
         self.total_charge_seconds: int = 0
         self.current_kwh: float        = 0.0
         self.total_cost: int           = 0
+        self.offering_energy: bool     = False
+        self.last_message_at: datetime = None
+        self.charging_state: str       = None
 
         self.firmware: Union(Firmware, None) = None
 
@@ -280,7 +283,10 @@ class Pod:
             "current_kwh": self.current_kwh,
             "total_cost": self.total_cost,
             "firmware": None,
-            "charge_override": None
+            "charge_override": None,
+            "offering_energy": self.offering_energy,
+            "last_message_at": lazy_iso_format_datetime(self.last_message_at),
+            "charging_state": self.charging_state if self.charging_state is not None else "Unknown"
         }
 
         for status in self.statuses:

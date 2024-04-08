@@ -7,6 +7,9 @@
 * Add support for charge override deletion:
   * Add `Client.async_delete_charge_override` - @mattrayner
 * Add `ConnectivityStatus` - @mattrayner
+* Add `Pod.offering_energy` - @mattrayner
+* Add `Pod.last_message_at` - @mattrayner
+* Add `Pod.charging_state` - @mattrayner
 
 ## v1.5.0
 
