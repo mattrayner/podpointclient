@@ -68,6 +68,11 @@ async def main(username: str, password: str, http_debug: bool = False, loop=None
     override = await client.async_set_charge_override(pod=pod, hours=1)
     print(f"  Override until: {override.ends_at}")
 
+    # Get charge override
+    print(f"Attempting to get charge override for pod {pod.ppid}")
+    override = await client.async_get_charge_override(pod=pod)
+    print(f"  Override ends at: {override.ends_at}")
+
     # Delete override
     print(f"Deleting 'Charge now' for pod {pod.ppid}")
     await client.async_delete_charge_override(pod=pod)
@@ -76,7 +81,8 @@ async def main(username: str, password: str, http_debug: bool = False, loop=None
     # Get charge override
     print(f"Attempting to get charge override for pod {pod.ppid}")
     override = await client.async_get_charge_override(pod=pod)
-    print(f"  Override ends at: {override.ends_at}")
+    print(f"  Override removed: {override is None}")
+
 
     # Get connectivity status
     print(f"Getting connectivity status for pod {pod.ppid}")
