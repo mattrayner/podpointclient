@@ -19,6 +19,7 @@ class StatusName(StrEnum):
     UNAVAILABLE    = "Unavailable"
     CHARGING       = "Charging"
     OUT_OF_SERVICE = "Out of Service"
+    SUSPENDED_EV   = "Charged*"
 
 
 class StatusKeyName(KebabCaseStrEnum):
@@ -27,6 +28,7 @@ class StatusKeyName(KebabCaseStrEnum):
     UNAVAILABLE    = auto()
     CHARGING       = auto()
     OUT_OF_SERVICE = auto()
+    SUSPENDED_EV   = auto()
 
 
 @dataclass
