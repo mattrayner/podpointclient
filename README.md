@@ -31,6 +31,13 @@ Method | Description
 `async_get_charges(perpage=5, page=2)` | *Get charges for a user* - Returns a list of `Charge` objects. `perpage` can be 'all', or a number. Can get additional pages with `page` attribute.
 `async_get_firmware(pod=_Pod_)` | *Get firmware information for a pod* - Returns a list of `Firmware` objects.
 `async_get_user(includes=[])` | *Get current user account information* - Returns a `User` object including account balance, units and vehicles. `includes` is a list of additional information pulled for a User. Pass an empty list to `includes` for minimal information or `None` for full data (defaults to `None`)
+`async_get_charge_override(pod=_Pod_)` | *Get the current charge override for a pod* - Returns a `ChargeOverride` object.
+`async_set_charge_override(pod=_Pod_, enabled=False, start_time=None, end_time=None)` | *Set a charge override for a pod* - Returns a `ChargeOverride` object.
+`async_delete_charge_override(pod=_Pod_)` | *Delete a charge override for a pod* - Returns a boolean.
+`async_set_charge_mode_manual(pod=_Pod_)` | *Set a pod to manual charge mode* - Returns a `Pod` object.
+`async_set_charge_mode_smart(pod=_Pod_)` | *Set a pod to smart charge mode* - Returns a `Pod` object.
+`async_get_charge_mode(pod=_Pod_)` | *Get the current charge mode for a pod* - Returns a `ChargeMode` object.
+`async_get_connection_status(pod=_Pod_)` | *Get the current connection status for a pod* - Returns a `ConnectionStatus` object.
 
 ### Example
 

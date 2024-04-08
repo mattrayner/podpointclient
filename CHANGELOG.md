@@ -10,6 +10,7 @@
 * Add `Pod.offering_energy` - @mattrayner
 * Add `Pod.last_message_at` - @mattrayner
 * Add `Pod.charging_state` - @mattrayner
+* Add `SUSPENDED_EV` to Pod state Enums - @mattrayner
 
 ## v1.5.0
 
