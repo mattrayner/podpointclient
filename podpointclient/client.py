@@ -35,14 +35,14 @@ class PodPointClient:
         self,
         username: str,
         password: str,
-        session: aiohttp.ClientSession = aiohttp.ClientSession(),
+        session: aiohttp.ClientSession = None,
         include_timestamp: bool = False,
         http_debug: bool = None
     ) -> None:
         """Pod Point API Client."""
         self.email = username
         self.password = password
-        self._session = session
+        self._session = session if session is not None else aiohttp.ClientSession()
         self._http_debug = http_debug if http_debug is not None else False
         self.auth = Auth(
             email=self.email,
