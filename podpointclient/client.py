@@ -53,6 +53,8 @@ class PodPointClient:
         self.api_wrapper = APIWrapper(session=self._session)
         self.include_timestamp = include_timestamp
 
+    async def async_attempt_login(self) -> LoginAttempt:
+
     async def async_credentials_verified(self) -> bool:
         """Perform a minimum call to verify we have working credentials and can get one Pod"""
         await self.auth.async_update_access_token()

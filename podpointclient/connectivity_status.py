@@ -175,19 +175,6 @@ class ConnectivityStatus:
         return connectivity_state.connectivity_status
 
     @property
-    def connectivity_status(self):
-        """Return the connectivity status of the first evse"""
-        evse = self.evses[0]
-        if evse is None:
-            return None
-
-        connectivity_state = evse.connectivity_state
-        if connectivity_state is None:
-            return None
-
-        return connectivity_state.connectivity_status
-
-    @property
     def last_message_at(self):
         """Return the last message at of the first evse"""
         evse = self.evses[0]

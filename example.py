@@ -19,87 +19,102 @@ async def main(username: str, password: str, http_debug: bool = False, loop=None
     )
 
     # Verify credentials work
-    verified = await client.async_credentials_verified()
-    print(f"Credentials verified: {verified}")
-    print(f"  Token expiry: {client.auth.access_token_expiry}")
+    attempted_login = client.async_attempt_login()
+    print(f"Attempted login response: {attempted_login}")
 
-    print("Sleeping 2s")
-    time.sleep(2)
+    if attempted_login.verified is False:
+        print("User account not automatically verified.")
 
-    # Get user information
-    print("Getting user details")
-    user = await client.async_get_user()
-    print(f"  Account balance {user.account.balance}p")
+    if attempted_login.mfa_required:
+        print(f"MFA Required for user. Code sent to {attempted_login.mfa.phone_info}")
+        print("Please enter the MFA code:")
+        mfa_code = input()
+        mfa_response = client.send_mfa_code(mfa=mfa_code)
+        print(f"MFA Response: {mfa_response}")
+        print("========================================")
 
-    print("Getting pods")
-    # Get all pods for a user
-    pods = await client.async_get_all_pods()
-    print(f"  Found {len(pods)} pod(s).")
+    # verified = await client.async_credentials_verified()
+    # print(f"Credentials verified: {attempted_login.verified}")
+    if attempted_login.verified is True:
+        print(f"  Token expiry: {client.auth.access_token_expiry}")
 
-    # Select one to update schedules for
-    pod = pods[0]
-    print(f"Selecting first pod: {pod.ppid}")
+        print("Sleeping 2s")
+        time.sleep(2)
 
-    # Get firmware information for the pod
-    firmwares = await client.async_get_firmware(pod=pod)
-    firmware = firmwares[0]
-    print(f"Gettnig firmware data for {pod.ppid}")
-    print(f"  Serial: {firmware.serial_number}")
-    print(f"  Update available: {firmware.update_available}")
+        # Get user information
+        print("Getting user details")
+        user = await client.async_get_user()
+        print(f"  Account balance {user.account.balance}p")
 
-    print(f"Enabling charging for {pod.ppid}")
-    # Update schedule to disabled (allow charging at any time)
-    await client.async_set_schedule(enabled=False, pod=pod)
+        print("Getting pods")
+        # Get all pods for a user
+        pods = await client.async_get_all_pods()
+        print(f"  Found {len(pods)} pod(s).")
 
-    # Get just that pod
-    pod = await client.async_get_pod(pod_id=pod.id)
-    # Check if the schedule is disabled
-    schedule_status = pod.charge_schedules[0].is_active
-    print(f"  Schedule active: {schedule_status}")
+        # Select one to update schedules for
+        pod = pods[0]
+        print(f"Selecting first pod: {pod.ppid}")
 
-    # Print last charge energy use
-    print(f"Getting last charge for pod {pod.ppid}")
-    charges = await client.async_get_charges(perpage=1, page=1)
-    energy_used = charges[0].kwh_used
-    print(f"  kW charged: {energy_used}")
+        # Get firmware information for the pod
+        firmwares = await client.async_get_firmware(pod=pod)
+        firmware = firmwares[0]
+        print(f"Gettnig firmware data for {pod.ppid}")
+        print(f"  Serial: {firmware.serial_number}")
+        print(f"  Update available: {firmware.update_available}")
 
-    # Set charge override
-    print(f"Setting 'Charge now' for pod {pod.ppid}")
-    override = await client.async_set_charge_override(pod=pod, hours=1)
-    print(f"  Override until: {override.ends_at}")
+        print(f"Enabling charging for {pod.ppid}")
+        # Update schedule to disabled (allow charging at any time)
+        await client.async_set_schedule(enabled=False, pod=pod)
 
-    # Get charge override
-    print(f"Attempting to get charge override for pod {pod.ppid}")
-    override = await client.async_get_charge_override(pod=pod)
-    print(f"  Override ends at: {override.ends_at}")
+        # Get just that pod
+        pod = await client.async_get_pod(pod_id=pod.id)
+        # Check if the schedule is disabled
+        schedule_status = pod.charge_schedules[0].is_active
+        print(f"  Schedule active: {schedule_status}")
 
-    # Delete override
-    print(f"Deleting 'Charge now' for pod {pod.ppid}")
-    await client.async_delete_charge_override(pod=pod)
-    print("  Done")
+        # Print last charge energy use
+        print(f"Getting last charge for pod {pod.ppid}")
+        charges = await client.async_get_charges(perpage=1, page=1)
+        energy_used = charges[0].kwh_used
+        print(f"  kW charged: {energy_used}")
 
-    # Get charge override
-    print(f"Attempting to get charge override for pod {pod.ppid}")
-    override = await client.async_get_charge_override(pod=pod)
-    print(f"  Override removed: {override is None}")
+        # Set charge override
+        print(f"Setting 'Charge now' for pod {pod.ppid}")
+        override = await client.async_set_charge_override(pod=pod, hours=1)
+        print(f"  Override until: {override.ends_at}")
+
+        # Get charge override
+        print(f"Attempting to get charge override for pod {pod.ppid}")
+        override = await client.async_get_charge_override(pod=pod)
+        print(f"  Override ends at: {override.ends_at}")
+
+        # Delete override
+        print(f"Deleting 'Charge now' for pod {pod.ppid}")
+        await client.async_delete_charge_override(pod=pod)
+        print("  Done")
+
+        # Get charge override
+        print(f"Attempting to get charge override for pod {pod.ppid}")
+        override = await client.async_get_charge_override(pod=pod)
+        print(f"  Override removed: {override is None}")
 
 
-    # Get connectivity status
-    print(f"Getting connectivity status for pod {pod.ppid}")
-    connectivity = await client.async_get_connectivity_status(pod=pod)
-    print(f"  Connectivity status: {connectivity.evses[0].connectivity_state.connectivity_status}")
-    print(f"  Last message at: {connectivity.evses[0].connectivity_state.last_message_at}")
+        # Get connectivity status
+        print(f"Getting connectivity status for pod {pod.ppid}")
+        connectivity = await client.async_get_connectivity_status(pod=pod)
+        print(f"  Connectivity status: {connectivity.evses[0].connectivity_state.connectivity_status}")
+        print(f"  Last message at: {connectivity.evses[0].connectivity_state.last_message_at}")
 
-    # Expire token and exchange a refresh
-    print("Expiring token and refreshing...")
-    client.auth.access_token_expiry = datetime.now() - timedelta(minutes=10)
-    updated = await client.auth.async_update_access_token()
-    print(f"  Token updated? {updated} - New expiry: {client.auth.access_token_expiry}")
+        # Expire token and exchange a refresh
+        print("Expiring token and refreshing...")
+        client.auth.access_token_expiry = datetime.now() - timedelta(minutes=10)
+        updated = await client.auth.async_update_access_token()
+        print(f"  Token updated? {updated} - New expiry: {client.auth.access_token_expiry}")
 
-    # Get user information again
-    print("Getting user details with new token")
-    user = await client.async_get_user()
-    print(f"  Account balance {user.account.balance}p")
+        # Get user information again
+        print("Getting user details with new token")
+        user = await client.async_get_user()
+        print(f"  Account balance {user.account.balance}p")
 
 if __name__ == "__main__":
     import time

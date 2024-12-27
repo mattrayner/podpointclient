@@ -21,6 +21,85 @@ from podpointclient.endpoints import GOOGLE_BASE_URL, PASSWORD_VERIFY, API_BASE_
 
 @pytest.mark.asyncio
 @freeze_time("Jan 1st, 2022")
+async def test_async_attempt_login_with_non_mfa_user():
+    auth_response = {
+        "idToken": "1234",
+        "expiresIn": "1234",
+        "refreshToken": "1234"
+    }
+    session_response = {
+        "sessions": {
+            "id": "1234",
+            "user_id": "1234"
+        }
+    }
+    pods_response = {
+        "pods": [
+            json.load(open('./tests/fixtures/complete_pod.json'))
+        ]
+    }
+
+    with aioresponses() as m:
+        m.post(f'{GOOGLE_BASE_URL}{PASSWORD_VERIFY}', payload=auth_response)
+        m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
+        m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?include=&perpage=1&page=1&timestamp=1640995200.0', payload=pods_response)
+
+        async with aiohttp.ClientSession() as session:
+            client = PodPointClient(username="1233", password="1234", session=session, include_timestamp=True)
+            login_response = await client.async_attempt_login()
+            assert login_response.mfa_required is False
+            assert login_response.vertified is True
+
+
+@pytest.mark.asyncio
+@freeze_time("Jan 1st, 2022")
+async def test_async_attempt_login_with_an_mfa_user():
+    auth_response = {
+        "kind": "identitytoolkit#VerifyPasswordResponse",
+        "localId": "214d4731-34a0-4c0d-ae88-049c2d2344dd",
+        "email": "1233",
+        "displayName": "",
+        "registered": True,
+        "mfaPendingCredential": "abcd1234",
+        "mfaInfo": [{
+            "phoneInfo": "+********1234",
+            "mfaEnrollmentId": "1234",
+            "displayName": "",
+            "enrolledAt": "2025-01-01T00:00:01.000000Z"
+        }]
+    }
+    # session_response = {
+    #     "sessions": {
+    #         "id": "1234",
+    #         "user_id": "1234"
+    #     }
+    # }
+    # pods_response = {
+    #     "pods": [
+    #         json.load(open('./tests/fixtures/complete_pod.json'))
+    #     ]
+    # }
+
+    with aioresponses() as m:
+        m.post(f'{GOOGLE_BASE_URL}{PASSWORD_VERIFY}', payload=auth_response)
+        # m.post(f'{API_BASE_URL}{SESSIONS}', payload=session_response)
+        # m.get(f'{API_BASE_URL}{USERS}/1234{PODS}?include=&perpage=1&page=1&timestamp=1640995200.0', payload=pods_response)
+
+        async with aiohttp.ClientSession() as session:
+            client = PodPointClient(username="1233", password="1234", session=session, include_timestamp=True)
+            login_response = await client.async_attempt_login()
+            assert login_response.mfa_required is True
+            assert login_response.mfa == {
+                "phone_info": "+********1234",
+                "mfa_enrollment_id": "1234",
+                "display_name": "",
+                "enrolled_at": "2025-01-01T00:00:01.000000Z"
+            }
+            assert login_response.verified is False
+
+
+@pytest.mark.asyncio
+@freeze_time("Jan 1st, 2022")
 async def test_async_credentials_verified():
     auth_response = {
         "idToken": "1234",
