@@ -29,3 +29,7 @@ GOOGLE_BASE_URL = f"https://{GOOGLE_BASE}"
 
 GOOGLE_TOKEN_BASE = 'securetoken.googleapis.com/v1'
 GOOGLE_TOKEN_BASE_URL = f"https://{GOOGLE_TOKEN_BASE}"
+
+GOOGLE_MFA_BASE_URL = "https://identitytoolkit.googleapis.com/v2/accounts/mfaSignIn"
+MFA_START = f"{GOOGLE_MFA_BASE_URL}:start{GOOGLE_KEY}"
+MFA_FINALIZE = f"{GOOGLE_MFA_BASE_URL}:finalize{GOOGLE_KEY}"

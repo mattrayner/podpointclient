@@ -1,14 +1,14 @@
 from datetime import datetime, timedelta
 from timeit import repeat
 from unittest.mock import AsyncMock, MagicMock
-from podpointclient.errors import AuthError, SessionError
+from podpointclient.errors import AuthError, MfaInvalidCode, MfaRequired, SessionError
 from podpointclient.helpers.auth import Auth
 import aiohttp
 import asyncio
 from aioresponses import aioresponses
 import logging
 
-from podpointclient.endpoints import GOOGLE_BASE_URL, PASSWORD_VERIFY, API_BASE_URL, API_VERSION, AUTH, SESSIONS, GOOGLE_TOKEN_BASE_URL, TOKEN
+from podpointclient.endpoints import GOOGLE_BASE_URL, PASSWORD_VERIFY, API_BASE_URL, API_VERSION, AUTH, SESSIONS, GOOGLE_TOKEN_BASE_URL, TOKEN, MFA_FINALIZE, MFA_START
 
 import pytest
 
@@ -292,3 +292,64 @@ async def test_session_json_error():
 def test_auth_no_session():
     auth = Auth(email=EMAIL, password=PASSWORD, session=False)
     assert auth.user_id == None
+
+
+async def test_sms_sign_in_and_restart(caplog):
+    password_response = {
+        "mfaPendingCredential": "pending-secret",
+        "mfaInfo": [{"mfaEnrollmentId": "sms-factor", "phoneInfo": "+44******123"}],
+    }
+    token_response = {
+        "id_token": "access-token-secret",
+        "refresh_token": "rotated-token-secret",
+        "expires_in": "3600",
+    }
+    session_response = {"sessions": {"id": "session", "user_id": "user"}}
+    with aioresponses() as mock:
+        mock.post(f"{GOOGLE_BASE_URL}{PASSWORD_VERIFY}", payload=password_response)
+        mock.post(MFA_START, payload={"phoneResponseInfo": {"sessionInfo": "sms-session-secret"}})
+        mock.post(MFA_FINALIZE, status=400, payload={"error": {"message": "INVALID_CODE"}})
+        mock.post(MFA_FINALIZE, payload={"refreshToken": "mfa-token-secret"})
+        mock.post(f"{GOOGLE_TOKEN_BASE_URL}{TOKEN}", payload=token_response, repeat=True)
+        mock.post(f"{API_BASE_URL}{SESSIONS}", payload=session_response, repeat=True)
+
+        with caplog.at_level(logging.DEBUG):
+            async with aiohttp.ClientSession() as session:
+                auth = Auth(EMAIL, PASSWORD, session, http_debug=True)
+                with pytest.raises(MfaRequired):
+                    await auth.async_update_access_token()
+                assert auth.access_token is None
+                await auth.async_start_mfa()
+
+                with pytest.raises(MfaInvalidCode):
+                    await auth.async_complete_mfa("000000")
+                assert await auth.async_complete_mfa("012345") is True
+                assert auth.user_id == "user"
+                assert auth.refresh_token == "rotated-token-secret"
+
+                on_refresh_token = MagicMock()
+                restarted = Auth(
+                    EMAIL, PASSWORD, session, refresh_token="previous-token",
+                    on_refresh_token=on_refresh_token,
+                )
+                assert await asyncio.gather(
+                    restarted.async_update_access_token(),
+                    restarted.async_update_access_token(),
+                ) == [True, True]
+                on_refresh_token.assert_called_once_with("rotated-token-secret")
+                assert restarted.user_id == "user"
+
+        mock.assert_any_call(MFA_START, method="POST", json={
+            "mfaPendingCredential": "pending-secret",
+            "mfaEnrollmentId": "sms-factor",
+            "phoneSignInInfo": {},
+        }, timeout=aiohttp.ClientTimeout(total=10))
+        mock.assert_any_call(MFA_FINALIZE, method="POST", json={
+            "mfaPendingCredential": "pending-secret",
+            "mfaEnrollmentId": "sms-factor",
+            "phoneVerificationInfo": {"sessionInfo": "sms-session-secret", "code": "012345"},
+        }, timeout=aiohttp.ClientTimeout(total=10))
+
+    for secret in (PASSWORD, "pending-secret", "sms-session-secret", "012345",
+                   "mfa-token-secret", "rotated-token-secret", "access-token-secret"):
+        assert secret not in caplog.text

@@ -1,6 +1,6 @@
 """PodPoint Basic API Client."""
 import logging
-from typing import Dict, Any, List, Union
+from typing import Callable, Dict, Any, List, Union
 from datetime import datetime, timedelta
 
 import aiohttp
@@ -37,7 +37,9 @@ class PodPointClient:
         password: str,
         session: aiohttp.ClientSession = aiohttp.ClientSession(),
         include_timestamp: bool = False,
-        http_debug: bool = None
+        http_debug: bool = None,
+        refresh_token: str = None,
+        on_refresh_token: Callable[[str], None] = None,
     ) -> None:
         """Pod Point API Client."""
         self.email = username
@@ -48,7 +50,9 @@ class PodPointClient:
             email=self.email,
             password=self.password,
             session=self._session,
-            http_debug=self._http_debug
+            http_debug=self._http_debug,
+            refresh_token=refresh_token,
+            on_refresh_token=on_refresh_token,
         )
         self.api_wrapper = APIWrapper(session=self._session)
         self.include_timestamp = include_timestamp
