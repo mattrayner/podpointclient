@@ -109,7 +109,7 @@ class APIWrapper:
         try:
             async with async_timeout.timeout(self._timeout):
                 start_time = time.time()
-                _LOGGER.debug("%s %s %s %s",method.upper(), url, params, data)
+                _LOGGER.debug("%s %s", method.upper(), url.split("?", 1)[0])
 
                 response = None
 

@@ -9,6 +9,21 @@ class AuthError(APIError):
         message = f'Auth Error ({status}) - {response}'
         super().__init__(message)
 
+class MfaRequired(AuthError):
+    """The password was accepted and an SMS challenge must be completed."""
+
+    def __init__(self):
+        super().__init__(200, "Two-step verification is required")
+
+
+class MfaError(AuthError):
+    """The SMS challenge could not be started or completed."""
+
+
+class MfaInvalidCode(MfaError):
+    """The verification code is incorrect and can be retried."""
+
+
 class SessionError(APIError):
     """An error relating to session creation with pod point"""
     def __init__(self, status, response):

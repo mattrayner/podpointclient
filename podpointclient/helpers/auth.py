@@ -1,13 +1,18 @@
 """Auth module for pod point, handled access token lifecycle."""
 
+import asyncio
 import logging
 from datetime import datetime, timedelta
+from typing import Callable
 
 import aiohttp
 
-from ..errors import APIError, AuthError, SessionError
+from ..errors import APIError, AuthError, MfaError, MfaInvalidCode, MfaRequired, SessionError
 from .session import Session
-from ..endpoints import GOOGLE_BASE_URL, PASSWORD_VERIFY, GOOGLE_TOKEN_BASE_URL, TOKEN
+from ..endpoints import (
+    GOOGLE_BASE_URL, PASSWORD_VERIFY, GOOGLE_TOKEN_BASE_URL, TOKEN,
+    MFA_START, MFA_FINALIZE,
+)
 from .functions import HEADERS
 from .api_wrapper import APIWrapper
 
@@ -20,12 +25,19 @@ class Auth():
         email: str,
         password: str,
         session: aiohttp.ClientSession,
-        http_debug: bool = None
+        http_debug: bool = None,
+        refresh_token: str = None,
+        on_refresh_token: Callable[[str], None] = None,
     ):
         self.email: str = email
         self.password: str = password
         self.access_token: str = None
-        self.refresh_token: str = None
+        self.refresh_token: str = refresh_token
+        self._on_refresh_token = on_refresh_token
+        self._token_lock = asyncio.Lock()
+        self._mfa_pending_credential = None
+        self._mfa_enrollment_id = None
+        self._mfa_session_info = None
         self.access_token_expiry: datetime = None
         self.session: Session = None
         self._session: aiohttp.ClientSession = session
@@ -56,13 +68,16 @@ class Auth():
 
     async def async_update_access_token(self) -> bool:
         """Update access token, if needed."""
-        if self.check_access_token():
-            return True
+        async with self._token_lock:
+            if self.check_access_token():
+                return True
+            return await self._async_update_session()
 
+    async def _async_update_session(self) -> bool:
         try:
             _LOGGER.debug('Updating access token')
             access_token_updated: bool = await self.__update_access_token(
-                refresh=self.access_token_expired()
+                refresh=bool(self.refresh_token) or self.access_token_expired()
             )
 
             _LOGGER.debug(
@@ -80,13 +95,17 @@ class Auth():
             session_created = await self.session.create()
 
             if session_created is False:
+                self.access_token_expiry = None
                 _LOGGER.error("Error creating session")
 
             return access_token_updated and session_created
+        except MfaRequired:
+            raise
         except AuthError as exception:
             _LOGGER.error("Error updating access token. %s", exception)
             raise exception
         except SessionError as exception:
+            self.access_token_expiry = None
             _LOGGER.error("Error creating session. %s", exception)
             raise exception
 
@@ -127,15 +146,24 @@ class Auth():
                 await self.__handle_response_error(response, AuthError)
 
             json = await response.json()
-            self.access_token = json[id_token_response]
-            self.refresh_token = json[refresh_token_response]
-            self.access_token_expiry = datetime.now() + timedelta(
+            if not refresh and json.get("mfaPendingCredential"):
+                self._prepare_mfa(json)
+                raise MfaRequired()
+            access_token = json[id_token_response]
+            refresh_token = json[refresh_token_response]
+            expiry = datetime.now() + timedelta(
                 seconds=int(json[expires_in_response]) - 10
             )
+            self.access_token = access_token
+            if refresh_token != self.refresh_token:
+                self.refresh_token = refresh_token
+                if self._on_refresh_token is not None:
+                    self._on_refresh_token(refresh_token)
+            self.access_token_expiry = expiry
             return_value = True
 
             if self._http_debug:
-                _LOGGER.debug(json)
+                _LOGGER.debug("Received authentication token response")
         except AuthError as exception:
             raise exception
         except KeyError as exception:
@@ -153,6 +181,73 @@ When calculating expiry date, got: {exception}."
             raise exception
 
         return return_value
+
+    def _prepare_mfa(self, response: dict) -> None:
+        self._mfa_pending_credential = None
+        self._mfa_enrollment_id = None
+        self._mfa_session_info = None
+        phone_factors = [
+            factor["mfaEnrollmentId"]
+            for factor in response.get("mfaInfo", [])
+            if factor.get("phoneInfo") and factor.get("mfaEnrollmentId")
+        ]
+        if len(phone_factors) != 1:
+            raise MfaError(200, "Expected exactly one enrolled SMS factor")
+        self._mfa_enrollment_id = phone_factors[0]
+        self._mfa_pending_credential = response["mfaPendingCredential"]
+
+    async def async_start_mfa(self) -> None:
+        """Request an SMS code after password sign-in raises MfaRequired."""
+        if not self._mfa_pending_credential:
+            raise MfaError(400, "No pending two-step verification")
+        self._mfa_session_info = None
+        response = await self._mfa_request(MFA_START, {
+            "mfaPendingCredential": self._mfa_pending_credential,
+            "mfaEnrollmentId": self._mfa_enrollment_id,
+            "phoneSignInInfo": {},
+        })
+        self._mfa_session_info = response.get("phoneResponseInfo", {}).get("sessionInfo")
+        if not self._mfa_session_info:
+            raise MfaError(200, "Missing SMS session")
+
+    async def async_complete_mfa(self, code: str) -> bool:
+        """Verify the SMS code and create the Pod Point session."""
+        if not self._mfa_session_info:
+            raise MfaError(400, "No active SMS challenge")
+        response = await self._mfa_request(MFA_FINALIZE, {
+            "mfaPendingCredential": self._mfa_pending_credential,
+            "mfaEnrollmentId": self._mfa_enrollment_id,
+            "phoneVerificationInfo": {"sessionInfo": self._mfa_session_info, "code": code},
+        })
+        self._mfa_pending_credential = None
+        self._mfa_enrollment_id = None
+        self._mfa_session_info = None
+        if not response.get("refreshToken"):
+            raise MfaError(200, "Missing refresh token after verification")
+        # Finalize does not return an expiry. Exchange the refresh token to
+        # obtain the usual access token, expiry and Pod Point session.
+        self.refresh_token = response["refreshToken"]
+        return await self.async_update_access_token()
+
+    async def _mfa_request(self, url: str, body: dict) -> dict:
+        # MFA request and response bodies contain one-time credentials.
+        try:
+            async with self._session.post(
+                url, json=body, timeout=aiohttp.ClientTimeout(total=10)
+            ) as response:
+                try:
+                    payload = await response.json()
+                except ValueError:
+                    raise MfaError(response.status, "Invalid verification response") from None
+                if not isinstance(payload, dict):
+                    raise MfaError(response.status, "Invalid verification response")
+                if response.status != 200:
+                    if payload.get("error", {}).get("message") == "INVALID_CODE":
+                        raise MfaInvalidCode(response.status, "Incorrect verification code")
+                    raise MfaError(response.status, "Verification request failed")
+                return payload
+        except (aiohttp.ClientError, asyncio.TimeoutError):
+            raise MfaError(0, "Could not contact the verification service") from None
 
     async def __handle_response_error(self, response, error_class):
         status = response.status
